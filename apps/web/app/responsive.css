@@ -1,0 +1,143 @@
+@media (max-width: 1050px) {
+  .hero {
+    grid-template-columns: 1fr;
+    max-width: 820px;
+  }
+  .ribbon-inner {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .ribbon-title {
+    grid-column: 1 / -1;
+    min-height: 70px;
+    border-bottom: 1px solid var(--line);
+  }
+  .updated {
+    display: none !important;
+  }
+  .verification {
+    grid-template-columns: 1fr;
+  }
+  .section-heading {
+    position: static;
+  }
+}
+
+@media (max-width: 800px) {
+  .scan-row {
+    grid-template-columns: 1fr auto;
+    padding: 20px 0;
+  }
+  .scan-row > .mono,
+  .scan-row > .receipt {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .hero {
+    padding-block: 70px 85px;
+    gap: 60px;
+  }
+  .hero-copy h1 {
+    font-size: clamp(3.9rem, 20vw, 5.8rem);
+  }
+  .hero-product {
+    overflow: clip;
+  }
+  .ribbon-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ribbon-inner > div:nth-child(2n) {
+    border-left: 0;
+  }
+  .metric {
+    min-height: 115px;
+    border-bottom: 1px solid var(--line);
+  }
+  .check-stack article {
+    grid-template-columns: 40px 1fr;
+    padding-block: 25px;
+  }
+  .rule-state {
+    display: none;
+  }
+  .comparison {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .comparison-arrow {
+    transform: rotate(90deg);
+    min-height: 50px;
+  }
+  .method-inner {
+    grid-template-columns: 1fr;
+    padding-block: 90px;
+  }
+  .document {
+    padding-block: 80px 110px;
+  }
+  .rule-list article {
+    grid-template-columns: 42px 1fr;
+  }
+  .api-grid {
+    grid-template-columns: 1fr;
+  }
+  .report-verdict,
+  .receipt-panel {
+    grid-template-columns: 1fr;
+  }
+  .report-meta {
+    margin-top: 20px;
+  }
+  .evidence-values {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .scan-form {
+    padding: 18px 16px 12px;
+  }
+  .input-row {
+    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 5px;
+  }
+  .protocol {
+    display: none;
+  }
+  .input-row input {
+    flex-basis: 100%;
+    padding-inline: 10px;
+  }
+  .input-row button {
+    width: 100%;
+  }
+  .confidence-line {
+    padding: 0 16px 17px;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  .checks-mini {
+    grid-template-columns: 1fr;
+  }
+  .receipt-row {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .recent-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .report-checks article > p,
+  .evidence-values {
+    margin-left: 0;
+  }
+  .report-check-head {
+    grid-template-columns: 28px 22px 1fr;
+  }
+  .report-check-head > strong {
+    grid-column: 3;
+  }
+}

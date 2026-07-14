@@ -1,0 +1,11 @@
+node_modules
+.next
+dist
+coverage
+test-results
+playwright-report
+.playwright-mcp
+artifacts
+package-lock.json
+apps/web/next-env.d.ts
+research/reference-repos

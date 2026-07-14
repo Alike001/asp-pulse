@@ -1,0 +1,40 @@
+{
+  "name": "asp-pulse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "npm run dev -w @asp-pulse/web",
+    "dev:api": "npm run dev -w @asp-pulse/api",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -b packages/core apps/api apps/worker --pretty false && tsc -p apps/web/tsconfig.json --noEmit --pretty false",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build:services": "tsc -b packages/core apps/api apps/worker",
+    "build:web": "next build apps/web",
+    "build": "npm run build:services && npm run build:web",
+    "prestart": "npm run build",
+    "start": "node scripts/start.mjs",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.2.9",
+    "prettier": "3.9.5",
+    "typescript": "6.0.3",
+    "vitest": "4.1.6"
+  }
+}

@@ -1,0 +1,133 @@
+.report-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--signal);
+  font-size: 0.7rem;
+}
+.report-verdict {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 50px;
+  align-items: end;
+  padding-bottom: 65px;
+  border-bottom: 1px solid var(--line);
+}
+.report-verdict h1 {
+  margin: 18px 0;
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+.report-verdict p {
+  max-width: 700px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+}
+.report-meta {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 8px 20px;
+  font-size: 0.65rem;
+}
+.report-meta span {
+  color: var(--muted);
+}
+.report-meta strong {
+  color: var(--text);
+}
+.report-checks {
+  margin-top: 70px;
+  border-top: 1px solid var(--line);
+}
+.report-checks article {
+  padding: 35px 0;
+  border-bottom: 1px solid var(--line);
+}
+.report-check-head {
+  display: grid;
+  grid-template-columns: 42px 24px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.report-check-head > .mono {
+  font-size: 0.65rem;
+}
+.report-check-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.25rem;
+}
+.report-check-head > strong {
+  font: 0.65rem monospace;
+  text-transform: uppercase;
+}
+.report-checks article > p {
+  margin: 18px 0 0 78px;
+  color: var(--muted);
+}
+.evidence-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: 25px 0 0 78px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.evidence-values > div {
+  min-width: 0;
+  padding: 20px;
+  background: var(--surface);
+}
+.evidence-values span,
+.receipt-panel span {
+  color: var(--muted);
+  font-size: 0.58rem;
+}
+.evidence-values pre {
+  overflow: auto;
+  margin: 12px 0 0;
+  color: var(--text);
+  font-size: 0.65rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.receipt-panel {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 30px;
+  margin-top: 70px;
+  padding: 35px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.receipt-panel div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.receipt-panel strong {
+  overflow-wrap: anywhere;
+  color: var(--signal);
+  font-size: 0.68rem;
+}
+.receipt-panel p {
+  grid-column: 1 / -1;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+.report-state {
+  min-height: 480px;
+  display: grid;
+  align-content: center;
+}
+.report-state h1 {
+  margin: 15px 0;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+}
+.report-state p {
+  color: var(--failure);
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@asp-pulse/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@asp-pulse/core": "0.1.0"
+  }
+}

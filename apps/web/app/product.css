@@ -1,0 +1,221 @@
+.scanner {
+  border: 1px solid #354039;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgb(17 23 19 / 96%);
+  box-shadow: 0 35px 90px rgb(0 0 0 / 45%);
+}
+.console-bar {
+  height: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+.console-bar > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.console-bar .mono {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+.scan-form {
+  padding: 25px 25px 17px;
+}
+.scan-form label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font: 0.65rem monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.input-row {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid #3b463f;
+  border-radius: 8px;
+  background: #0a0d0b;
+}
+.input-row:focus-within {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgb(183 243 74 / 8%);
+}
+.protocol {
+  color: #6f7771;
+  padding-left: 12px;
+  font: 0.8rem monospace;
+}
+.input-row input {
+  min-width: 0;
+  flex: 1;
+  height: 46px;
+  padding: 0 5px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: 0.82rem monospace;
+}
+.input-row input::placeholder {
+  color: #616862;
+}
+.input-row button {
+  height: 46px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--signal);
+  color: #11150f;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.input-row button:hover {
+  background: #c7ff5e;
+}
+.input-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.confidence-line {
+  display: flex;
+  gap: 19px;
+  padding: 0 25px 20px;
+  color: var(--muted);
+  font-size: 0.61rem;
+}
+.confidence-line span::first-letter {
+  color: var(--signal);
+}
+.scanner-empty {
+  min-height: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 3px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  padding: 35px;
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--signal);
+  font-size: 1.5rem;
+}
+.scanner-empty strong {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.scanner-empty p {
+  max-width: 360px;
+  margin: 5px 0 0;
+  font-size: 0.7rem;
+}
+.scan-progress {
+  position: relative;
+  min-height: 100px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+.progress-sweep {
+  position: absolute;
+  top: 0;
+  left: -35%;
+  width: 35%;
+  height: 2px;
+  background: var(--signal);
+  animation: sweep 1.5s ease-in-out infinite;
+}
+@keyframes sweep {
+  to {
+    left: 100%;
+  }
+}
+.scan-error {
+  margin: 0;
+  border-top: 1px solid var(--failure);
+  padding: 18px 25px;
+  color: #ffb2b2;
+  background: rgb(240 93 94 / 8%);
+  font-size: 0.76rem;
+}
+.scan-summary {
+  padding: 26px;
+  border-top: 1px solid var(--line);
+}
+.summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.summary-head h3 {
+  margin: 8px 0 20px;
+  font-size: 1.6rem;
+}
+.latency {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.checks-mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.checks-mini > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+.status-glyph {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font: 0.68rem monospace;
+}
+.status-pass {
+  color: var(--signal) !important;
+}
+.status-fail {
+  color: var(--failure) !important;
+}
+.status-warning {
+  color: var(--warning) !important;
+}
+.status-not_tested {
+  color: var(--muted) !important;
+}
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.58rem;
+}

@@ -1,0 +1,16 @@
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+coverage/
+.data/
+test-results/
+playwright-report/
+.playwright-mcp/
+artifacts/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+research/reference-repos/
