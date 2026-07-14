@@ -8,9 +8,9 @@
 }
 .hero-copy h1 {
   margin: 25px 0 30px;
-  font-size: clamp(4rem, 7vw, 7.25rem);
-  line-height: 0.87;
-  letter-spacing: -0.075em;
+  font-size: clamp(3.25rem, 5vw, 5.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.065em;
   font-weight: 760;
 }
 .hero-copy p {
@@ -109,8 +109,8 @@
 .method-inner h2,
 .closing h2 {
   margin: 24px 0 28px;
-  font-size: clamp(3rem, 5vw, 5.8rem);
-  line-height: 0.95;
+  font-size: clamp(2.6rem, 4vw, 4.75rem);
+  line-height: 0.98;
   letter-spacing: -0.06em;
 }
 .section-heading p {

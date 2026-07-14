@@ -39,7 +39,8 @@
     gap: 60px;
   }
   .hero-copy h1 {
-    font-size: clamp(3.9rem, 20vw, 5.8rem);
+    font-size: clamp(3rem, 13vw, 4.25rem);
+    line-height: 0.96;
   }
   .hero-product {
     overflow: clip;
