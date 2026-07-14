@@ -22,7 +22,17 @@ npm run verify
 npm start
 ```
 
-The site runs on port `3000` and the API on `8787`. Override `NEXT_PUBLIC_API_URL`, `PORT`, or `PULSE_DATABASE_PATH` as needed before building/deploying.
+`npm start` is the local production check: the site runs at `:3000` and the API at `:8787`. Override those local ports with `WEB_PORT` and `API_PORT`.
+
+### Deploy as an A2MCP service
+
+Deploy the web and API as **two separate HTTPS services**. Do not use the combined `npm start` command on a one-port host.
+
+1. Deploy the API with `npm run start:api`, a persistent writable volume, and `API_PORT` set to the host's assigned port.
+2. Set `NEXT_PUBLIC_API_URL` to the API's public HTTPS origin, then build and deploy the web with `npm run start:web` and `PORT` set to its host-assigned port.
+3. Confirm `GET /health`, `GET /discover`, and `POST /v1/scans` on the API's public origin before registering it. The browser must make a successful scan against that same public API origin.
+
+`NEXT_PUBLIC_API_URL` is embedded during the web build. Rebuild the web whenever the API origin changes. The default SQLite store is suitable only when the API host guarantees a persistent writable volume; use a production database before deploying to an ephemeral/serverless filesystem.
 
 ## What the six checks mean
 

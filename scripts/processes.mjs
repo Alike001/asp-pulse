@@ -1,11 +1,20 @@
 import { spawn } from 'node:child_process'
 
 export function runProduct(mode) {
-  const api = spawn(process.execPath, ['apps/api/dist/server.js'], { stdio: 'inherit' })
+  const api = spawn(process.execPath, ['apps/api/dist/server.js'], {
+    stdio: 'inherit',
+    env: { ...process.env, API_PORT: process.env.API_PORT ?? '8787' },
+  })
   const next = spawn(
     process.execPath,
-    ['node_modules/next/dist/bin/next', mode, 'apps/web'],
-    { stdio: 'inherit' },
+    [
+      'node_modules/next/dist/bin/next',
+      mode,
+      'apps/web',
+      '--port',
+      process.env.WEB_PORT ?? '3000',
+    ],
+    { stdio: 'inherit', env: { ...process.env, PORT: process.env.WEB_PORT ?? '3000' } },
   )
   const children = [api, next]
 
