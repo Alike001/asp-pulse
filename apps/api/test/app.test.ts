@@ -18,6 +18,7 @@ describe('scan API', () => {
             'payment-required': Buffer.from(
               JSON.stringify({
                 x402Version: 2,
+                resource: { url: 'https://provider.example/service' },
                 accepts: [
                   {
                     scheme: 'exact',

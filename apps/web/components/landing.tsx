@@ -10,8 +10,12 @@ import { StatusGlyph } from './brand'
 const checkCopy = [
   ['01', 'Discovery metadata', 'Can the service describe what it offers?'],
   ['02', 'Endpoint reachability', 'Does the route answer with a payment challenge now?'],
-  ['03', 'x402 challenge', 'Is the challenge valid x402 version 2?'],
-  ['04', 'X Layer settlement', 'Does it name chain 196 and a supported asset?'],
+  ['03', 'x402 challenge', 'Is it valid version 2 and bound to this endpoint?'],
+  [
+    '04',
+    'X Layer payment terms',
+    'Does it name chain 196, a supported scheme and asset?',
+  ],
   ['05', 'Advertised price', 'Does the live price match the listing?'],
   ['06', 'Protected response', 'Did a paid canary deliver the promised schema?'],
 ]
@@ -50,8 +54,8 @@ export function Landing() {
             you pay.
           </h1>
           <p>
-            Verify that an OKX.AI service is live, x402-ready, and settling correctly
-            before your agent spends.
+            Verify that an x402 service is live, challenge-bound, and offering supported X
+            Layer terms before your agent spends.
           </p>
           <a className="text-link" href="#network">
             See the network pulse <span>→</span>
@@ -110,7 +114,7 @@ export function Landing() {
           <div className="current">
             <span className="comparison-label">Live service readiness</span>
             <strong>Callable now</strong>
-            <strong>Correct payment terms</strong>
+            <strong>Supported payment terms</strong>
             <strong>Evidence receipt</strong>
           </div>
         </div>

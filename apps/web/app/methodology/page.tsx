@@ -11,11 +11,11 @@ const rules = [
   ],
   [
     'x402 challenge',
-    'Passes only when the response contains a parseable x402 version 2 challenge and at least one complete payment requirement.',
+    'Passes only when the response contains a parseable x402 version 2 challenge whose resource URL matches the exact endpoint scanned.',
   ],
   [
     'X Layer settlement',
-    'Passes only when a payment option uses eip155:196 and an explicitly supported X Layer asset address.',
+    'Passes only when a payment option uses eip155:196, an officially supported scheme, an explicitly supported X Layer asset address, a positive amount, and a valid recipient address.',
   ],
   [
     'Advertised price',

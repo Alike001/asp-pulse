@@ -1,6 +1,6 @@
 # ASP Pulse
 
-**Know before you pay.** ASP Pulse checks whether an OKX.AI/x402 service is callable now, returns a valid x402 v2 challenge, and offers supported X Layer settlement terms before an agent sends payment.
+**Know before you pay.** ASP Pulse checks whether an x402 service is callable now, returns a challenge bound to the exact endpoint, and offers supported X Layer payment terms before an agent sends payment.
 
 The verdict is deterministic. The same captured evidence and `PULSE-RULESET/1.0.0` produce the same SHA-256 receipt. A free preflight never claims to verify the protected response; that check remains **not tested** unless a real paid canary has succeeded.
 
@@ -28,8 +28,8 @@ The site runs on port `3000` and the API on `8787`. Override `NEXT_PUBLIC_API_UR
 
 1. Discovery metadata — verified listing data, when supplied.
 2. Endpoint reachability — live HTTP 402 response.
-3. x402 challenge — canonical base64 `PAYMENT-REQUIRED` header or compatible JSON body, parsed as x402 v2.
-4. X Layer settlement — `eip155:196`, a supported asset, a positive atomic amount, and valid recipient address.
+3. x402 challenge — canonical base64 `PAYMENT-REQUIRED` header or compatible JSON body, parsed as x402 v2 and bound to the scanned resource URL.
+4. X Layer payment terms — `eip155:196`, an officially supported scheme, a supported asset, a positive atomic amount, and valid recipient address.
 5. Advertised price — exact amount/asset comparison when trusted listing metadata is available.
 6. Protected response — real paid-canary schema evidence only; otherwise visibly not tested.
 

@@ -1,6 +1,7 @@
 export const RULE_SET_VERSION = 'PULSE-RULESET/1.0.0'
 export const X402_VERSION = 2
 export const X_LAYER_NETWORK = 'eip155:196'
+export const X_LAYER_PAYMENT_SCHEMES = new Set(['exact', 'aggr_deferred'])
 
 export const X_LAYER_ASSETS = {
   USDG: '0x4ae46a509f6b1d9056937ba4500cb143933d2dc8',

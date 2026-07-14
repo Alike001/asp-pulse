@@ -3,6 +3,7 @@ import {
   SUPPORTED_ASSETS,
   X402_VERSION,
   X_LAYER_NETWORK,
+  X_LAYER_PAYMENT_SCHEMES,
 } from './constants.js'
 import { parseX402Challenge } from './challenge.js'
 import { evidenceHash } from './canonical.js'
@@ -84,15 +85,7 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
             : 'Endpoint responded, but not with HTTP 402.',
           { expected: 402, observed: observation.httpStatus },
         ),
-    challenge?.x402Version === X402_VERSION
-      ? check('x402_challenge', 'x402 challenge', 'pass', 'Challenge is valid x402 v2.', {
-          expected: X402_VERSION,
-          observed: challenge.x402Version,
-        })
-      : check('x402_challenge', 'x402 challenge', 'fail', 'No valid x402 v2 challenge.', {
-          expected: X402_VERSION,
-          observed: challenge?.x402Version,
-        }),
+    evaluateChallenge(challenge, observation.target),
     compatible && compatible.length > 0
       ? check(
           'settlement',
@@ -100,7 +93,11 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
           'pass',
           'Supported X Layer settlement found.',
           {
-            expected: { network: X_LAYER_NETWORK, assets: [...SUPPORTED_ASSETS] },
+            expected: {
+              network: X_LAYER_NETWORK,
+              assets: [...SUPPORTED_ASSETS],
+              schemes: [...X_LAYER_PAYMENT_SCHEMES],
+            },
             observed: compatible.map(({ network, asset, scheme }) => ({
               network,
               asset,
@@ -114,7 +111,11 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
           'fail',
           'No supported X Layer asset found.',
           {
-            expected: { network: X_LAYER_NETWORK, assets: [...SUPPORTED_ASSETS] },
+            expected: {
+              network: X_LAYER_NETWORK,
+              assets: [...SUPPORTED_ASSETS],
+              schemes: [...X_LAYER_PAYMENT_SCHEMES],
+            },
             observed: challenge?.accepts.map(({ network, asset }) => ({
               network,
               asset,
@@ -169,13 +170,77 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
   }
 }
 
+function evaluateChallenge(
+  challenge: ReturnType<typeof parseX402Challenge>,
+  target: string,
+): CheckResult {
+  if (challenge?.x402Version !== X402_VERSION) {
+    return check(
+      'x402_challenge',
+      'x402 challenge',
+      'fail',
+      'No valid x402 v2 challenge.',
+      {
+        expected: X402_VERSION,
+        observed: challenge?.x402Version,
+      },
+    )
+  }
+  if (!resourceMatchesTarget(challenge.resource?.url, target)) {
+    return check(
+      'x402_challenge',
+      'x402 challenge',
+      'fail',
+      'Challenge resource does not match the scanned endpoint.',
+      {
+        expected: { x402Version: X402_VERSION, resourceUrl: target },
+        observed: {
+          x402Version: challenge.x402Version,
+          resourceUrl: challenge.resource?.url,
+        },
+      },
+    )
+  }
+  return check(
+    'x402_challenge',
+    'x402 challenge',
+    'pass',
+    'Challenge is valid x402 v2 and bound to this endpoint.',
+    {
+      expected: { x402Version: X402_VERSION, resourceUrl: target },
+      observed: {
+        x402Version: challenge.x402Version,
+        resourceUrl: challenge.resource?.url,
+      },
+    },
+  )
+}
+
+function resourceMatchesTarget(resourceUrl: string | undefined, target: string): boolean {
+  if (!resourceUrl) return false
+  try {
+    const resource = new URL(resourceUrl)
+    const scanned = new URL(target)
+    return (
+      resource.protocol === scanned.protocol &&
+      resource.host === scanned.host &&
+      resource.pathname === scanned.pathname &&
+      resource.search === scanned.search
+    )
+  } catch {
+    return false
+  }
+}
+
 function isXLayerCompatible(requirement: {
+  scheme: string
   network: string
   asset: string
   amount: string
   payTo: string
 }): boolean {
   return (
+    X_LAYER_PAYMENT_SCHEMES.has(requirement.scheme) &&
     requirement.network === X_LAYER_NETWORK &&
     SUPPORTED_ASSETS.has(requirement.asset.toLowerCase()) &&
     /^\d+$/.test(requirement.amount) &&

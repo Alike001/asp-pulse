@@ -54,6 +54,40 @@ describe('evaluatePreflight', () => {
     expect(report.checks.find((item) => item.id === 'settlement')?.status).toBe('fail')
   })
 
+  it('rejects an unsupported payment scheme', () => {
+    const report = evaluatePreflight({
+      ...baseObservation,
+      challengeBody: validChallenge({
+        accepts: [
+          {
+            scheme: 'unsupported-scheme',
+            network: 'eip155:196',
+            amount: '500',
+            payTo: '0x0dedc3c5e15bee45166924ea5b02f54a35b1f9c6',
+            asset: X_LAYER_ASSETS.USDG,
+          },
+        ],
+      }),
+    })
+
+    expect(report.verdict).toBe('invalid')
+    expect(report.checks.find((item) => item.id === 'settlement')?.status).toBe('fail')
+  })
+
+  it('rejects a challenge bound to another resource', () => {
+    const report = evaluatePreflight({
+      ...baseObservation,
+      challengeBody: validChallenge({
+        resource: { url: 'https://other.example/paid-route' },
+      }),
+    })
+
+    expect(report.verdict).toBe('invalid')
+    expect(report.checks.find((item) => item.id === 'x402_challenge')?.status).toBe(
+      'fail',
+    )
+  })
+
   it('returns verified only when a paid canary matched the protected schema', () => {
     const report = evaluatePreflight({
       ...baseObservation,
