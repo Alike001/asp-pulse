@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "npm --prefix ../.. run build:services && next build",
     "start": "next start"
   },
   "dependencies": {
+    "@asp-pulse/api": "0.1.0",
     "next": "16.2.9",
     "react": "19.2.7",
     "react-dom": "19.2.7"

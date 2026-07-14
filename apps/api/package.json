@@ -3,6 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./app": {
+      "types": "./dist/app.d.ts",
+      "default": "./dist/app.js"
+    },
+    "./store-factory": {
+      "types": "./dist/store-factory.d.ts",
+      "default": "./dist/store-factory.js"
+    }
+  },
   "scripts": {
     "dev": "node --watch src/server.ts",
     "build": "tsc -b",
@@ -11,6 +21,7 @@
   "dependencies": {
     "@asp-pulse/core": "0.1.0",
     "@hono/node-server": "2.0.8",
+    "@neondatabase/serverless": "^1.1.0",
     "hono": "4.12.30",
     "undici": "8.7.0"
   }

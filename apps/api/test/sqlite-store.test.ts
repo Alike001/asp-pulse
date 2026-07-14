@@ -5,7 +5,7 @@ import { SqliteScanStore } from '../src/sqlite-store.js'
 describe('SQLite scan store', () => {
   it('persists and orders replayable reports', async () => {
     const store = new SqliteScanStore(':memory:')
-    const report = evaluatePreflight({
+    const evidence = {
       target: 'https://provider.example/service',
       checkedAt: '2026-07-14T12:00:00.000Z',
       latencyMs: 42,
@@ -22,10 +22,13 @@ describe('SQLite scan store', () => {
           },
         ],
       },
-    })
+    }
+    const report = evaluatePreflight(evidence)
 
-    await store.save({ id: 'stored-1', report })
-    expect((await store.find('stored-1'))?.report.evidenceHash).toBe(report.evidenceHash)
+    await store.save({ id: 'stored-1', report, evidence })
+    const stored = await store.find('stored-1')
+    expect(stored?.report.evidenceHash).toBe(report.evidenceHash)
+    expect(stored?.evidence).toEqual(evidence)
     expect((await store.recent(25))[0]?.id).toBe('stored-1')
     store.close()
   })

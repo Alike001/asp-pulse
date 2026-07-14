@@ -26,13 +26,24 @@ npm start
 
 ### Deploy as an A2MCP service
 
-Deploy the web and API as **two separate HTTPS services**. Do not use the combined `npm start` command on a one-port host.
+For a conventional host, deploy the web and API as **two separate HTTPS services**. Do not use the combined `npm start` command on a one-port host.
 
 1. Deploy the API with `npm run start:api`, a persistent writable volume, and `API_PORT` set to the host's assigned port.
 2. Set `NEXT_PUBLIC_API_URL` to the API's public HTTPS origin, then build and deploy the web with `npm run start:web` and `PORT` set to its host-assigned port.
 3. Confirm `GET /health`, `GET /discover`, and `POST /v1/scans` on the API's public origin before registering it. The browser must make a successful scan against that same public API origin.
 
 `NEXT_PUBLIC_API_URL` is embedded during the web build. Rebuild the web whenever the API origin changes. The default SQLite store is suitable only when the API host guarantees a persistent writable volume; use a production database before deploying to an ephemeral/serverless filesystem.
+
+### Deploy on Vercel with durable Postgres
+
+ASP Pulse supports a single Vercel project: its Next route handler exposes the API under `/api/*` and preserves the public API contract beneath that prefix (for example `/api/v1/scans` and `/api/discover`).
+
+1. In Vercel, add a Postgres provider from the Marketplace (Neon is supported) and connect it to this project. Vercel injects provider credentials into the project; map the connection string to a **server-only** `DATABASE_URL` environment variable.
+2. Set `NEXT_PUBLIC_API_URL` to `/api` for Production and Preview. This is safe to expose because it is only the same-origin API path—not a credential.
+3. Deploy with the project root set to `apps/web`, enable **Include source files outside of the Root Directory in the Build Step**, and set the Vercel Build Command to `npm run vercel-build`. That command compiles the sibling API workspace before Next bundles the route handler.
+4. After deployment, call `GET /api/health`, `GET /api/discover`, and `POST /api/v1/scans`. If `DATABASE_URL` is absent on Vercel, the API intentionally fails rather than falling back to temporary storage.
+
+For this Vercel configuration, do not use `start:api` or a separate public API origin. Keep `DATABASE_URL` out of `.env` files committed to Git and out of every `NEXT_PUBLIC_*` variable.
 
 ## Quality gate
 
