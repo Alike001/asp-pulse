@@ -8,8 +8,8 @@ export default function ApiReferencePage() {
         <span className="eyebrow">#PUBLIC API</span>
         <h1>Check from any agent.</h1>
         <p className="document-lead">
-          The same deterministic scan used by the landing page is available as JSON. No
-          wallet or payment is required for a preflight.
+          The same deterministic, GET-only preflight used by the landing page is available
+          as JSON and as an MCP tool. No wallet or payment is required.
         </p>
         <div className="code-panel mono">
           <span>POST /v1/scans</span>
@@ -17,7 +17,17 @@ export default function ApiReferencePage() {
   "target": "https://service.example/paid-route"
 }`}</pre>
         </div>
+        <div className="code-panel mono">
+          <span>STREAMABLE HTTP MCP /mcp</span>
+          <pre>{`tool: preflight_x402_endpoint
+input: { "target": "https://service.example/paid-route" }`}</pre>
+        </div>
         <div className="api-grid">
+          <article>
+            <span className="mono">MCP</span>
+            <h2>/mcp</h2>
+            <p>Call the same public HTTPS GET preflight from an MCP client.</p>
+          </article>
           <article>
             <span className="mono">GET</span>
             <h2>/v1/scans/:id</h2>

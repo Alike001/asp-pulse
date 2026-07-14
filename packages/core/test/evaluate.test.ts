@@ -23,7 +23,7 @@ describe('evaluatePreflight', () => {
     )
   })
 
-  it('returns invalid for the wrong settlement network', () => {
+  it('returns invalid for the wrong X Layer payment network', () => {
     const report = evaluatePreflight({
       ...baseObservation,
       challengeBody: validChallenge({
@@ -40,7 +40,7 @@ describe('evaluatePreflight', () => {
     })
 
     expect(report.verdict).toBe('invalid')
-    expect(report.checks.find((item) => item.id === 'settlement')?.status).toBe('fail')
+    expect(report.checks.find((item) => item.id === 'payment_terms')?.status).toBe('fail')
   })
 
   it('rejects malformed X Layer payment terms', () => {
@@ -51,7 +51,7 @@ describe('evaluatePreflight', () => {
       challengeBody: challenge,
     })
     expect(report.verdict).toBe('invalid')
-    expect(report.checks.find((item) => item.id === 'settlement')?.status).toBe('fail')
+    expect(report.checks.find((item) => item.id === 'payment_terms')?.status).toBe('fail')
   })
 
   it('rejects an unsupported payment scheme', () => {
@@ -71,7 +71,7 @@ describe('evaluatePreflight', () => {
     })
 
     expect(report.verdict).toBe('invalid')
-    expect(report.checks.find((item) => item.id === 'settlement')?.status).toBe('fail')
+    expect(report.checks.find((item) => item.id === 'payment_terms')?.status).toBe('fail')
   })
 
   it('rejects a challenge bound to another resource', () => {

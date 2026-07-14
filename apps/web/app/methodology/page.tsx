@@ -7,15 +7,15 @@ const rules = [
   ],
   [
     'Endpoint reachability',
-    'Passes when the public endpoint returns HTTP 402. A different response is a warning; a network error fails.',
+    'Passes when the public HTTPS GET endpoint returns HTTP 402. A different response is a warning; a network error fails.',
   ],
   [
     'x402 challenge',
     'Passes only when the response contains a parseable x402 version 2 challenge whose resource URL matches the exact endpoint scanned.',
   ],
   [
-    'X Layer settlement',
-    'Passes only when a payment option uses eip155:196, an officially supported scheme, an explicitly supported X Layer asset address, a positive amount, and a valid recipient address.',
+    'X Layer payment terms',
+    'Passes only when an advertised payment option uses eip155:196, an officially supported scheme, an explicitly supported X Layer asset address, a positive amount, and a valid recipient address. It does not prove settlement.',
   ],
   [
     'Advertised price',

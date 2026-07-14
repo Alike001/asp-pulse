@@ -3,7 +3,7 @@ import { evaluatePreflight, X_LAYER_ASSETS } from '@asp-pulse/core'
 import { SqliteScanStore } from '../src/sqlite-store.js'
 
 describe('SQLite scan store', () => {
-  it('persists and orders replayable reports', async () => {
+  it('persists and orders reports with recomputable receipts', async () => {
     const store = new SqliteScanStore(':memory:')
     const evidence = {
       target: 'https://provider.example/service',

@@ -2,7 +2,7 @@ export const CHECK_IDS = [
   'discovery',
   'reachability',
   'x402_challenge',
-  'settlement',
+  'payment_terms',
   'price',
   'response_contract',
 ] as const

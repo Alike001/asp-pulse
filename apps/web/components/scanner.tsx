@@ -70,7 +70,7 @@ export function Scanner({ onComplete, compact = false }: ScannerProps) {
         <div className="confidence-line">
           <span>✓ No wallet required</span>
           <span>✓ No payment sent</span>
-          <span>✓ Replayable result</span>
+          <span>✓ Recomputable receipt</span>
         </div>
       )}
 
@@ -98,7 +98,8 @@ function ScannerEmpty() {
       <div>
         <strong>Ready for the first check</strong>
         <p>
-          No sample result is shown here. Paste a real public endpoint to create evidence.
+          No sample result is shown here. Paste a real public HTTPS GET endpoint to create
+          evidence.
         </p>
       </div>
     </div>

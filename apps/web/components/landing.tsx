@@ -76,8 +76,8 @@ export function Landing() {
             One explainable verdict.
           </h2>
           <p>
-            Every label comes from a published rule. Open the evidence, replay the input,
-            get the same answer.
+            Every label comes from a published rule. Recompute the stored evidence to
+            confirm the same answer.
           </p>
         </div>
         <div className="check-stack">
@@ -124,7 +124,7 @@ export function Landing() {
       <section className="method-band">
         <div className="shell method-inner">
           <div>
-            <span className="eyebrow">#REPLAYABLE BY DESIGN</span>
+            <span className="eyebrow">#RECOMPUTABLE RECEIPTS</span>
             <h2>
               No mystery score.
               <br />

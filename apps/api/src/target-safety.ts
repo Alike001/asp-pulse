@@ -65,17 +65,17 @@ export async function validatePublicTarget(
   try {
     target = new URL(input)
   } catch {
-    throw new Error('Enter a complete HTTP or HTTPS endpoint.')
+    throw new Error('Enter a complete HTTPS endpoint.')
   }
 
-  if (!['http:', 'https:'].includes(target.protocol)) {
-    throw new Error('Only HTTP and HTTPS endpoints can be checked.')
+  if (target.protocol !== 'https:') {
+    throw new Error('Only public HTTPS endpoints can be checked.')
   }
   if (target.username || target.password) {
     throw new Error('Endpoints with embedded credentials are not allowed.')
   }
-  if (target.port && !['80', '443'].includes(target.port)) {
-    throw new Error('Only standard HTTP and HTTPS ports are allowed.')
+  if (target.port && target.port !== '443') {
+    throw new Error('Only the standard HTTPS port is allowed.')
   }
 
   const literalFamily = isIP(target.hostname)

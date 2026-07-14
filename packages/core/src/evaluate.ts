@@ -29,7 +29,7 @@ function verdictFor(checks: CheckResult[]): Verdict {
   const hardGateIds = new Set<CheckResult['id']>([
     'reachability',
     'x402_challenge',
-    'settlement',
+    'payment_terms',
   ])
   if (checks.some((item) => item.status === 'fail' && hardGateIds.has(item.id))) {
     return 'invalid'
@@ -88,10 +88,10 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
     evaluateChallenge(challenge, observation.target),
     compatible && compatible.length > 0
       ? check(
-          'settlement',
-          'X Layer settlement',
+          'payment_terms',
+          'X Layer payment terms',
           'pass',
-          'Supported X Layer settlement found.',
+          'Supported X Layer payment terms found.',
           {
             expected: {
               network: X_LAYER_NETWORK,
@@ -106,8 +106,8 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
           },
         )
       : check(
-          'settlement',
-          'X Layer settlement',
+          'payment_terms',
+          'X Layer payment terms',
           'fail',
           'No supported X Layer asset found.',
           {

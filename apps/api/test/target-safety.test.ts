@@ -23,4 +23,12 @@ describe('target safety', () => {
       ]),
     ).rejects.toThrow('Private, local, and reserved')
   })
+
+  it('rejects an insecure HTTP endpoint', async () => {
+    await expect(
+      validatePublicTarget('http://provider.example/check', async () => [
+        { address: '93.184.216.34', family: 4 },
+      ]),
+    ).rejects.toThrow('Only public HTTPS endpoints')
+  })
 })

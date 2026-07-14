@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import {
   evaluatePreflight,
   RULE_SET_VERSION,
@@ -7,7 +6,9 @@ import {
 } from '@asp-pulse/core'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { probeEndpoint, type ProbeDependencies } from './probe.js'
+import { createMcpHandler } from './mcp.js'
+import { type ProbeDependencies } from './probe.js'
+import { createScanService } from './scan-service.js'
 import { MemoryScanStore, type ScanStore } from './store.js'
 
 export interface AppDependencies extends ProbeDependencies {
@@ -18,9 +19,27 @@ export interface AppDependencies extends ProbeDependencies {
 export function createApp(dependencies: AppDependencies = {}): Hono {
   const app = new Hono()
   const store = dependencies.store ?? new MemoryScanStore()
-  const createId = dependencies.createId ?? randomUUID
+  const scanService = createScanService({
+    ...dependencies,
+    store,
+  })
+  const mcpHandler = createMcpHandler(scanService)
 
   app.use('/v1/*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'OPTIONS'] }))
+  app.use(
+    '/mcp',
+    cors({
+      origin: '*',
+      allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+      allowHeaders: [
+        'Content-Type',
+        'Mcp-Protocol-Version',
+        'Mcp-Session-Id',
+        'Last-Event-ID',
+      ],
+      exposeHeaders: ['Mcp-Protocol-Version', 'Mcp-Session-Id'],
+    }),
+  )
 
   app.get('/health', (context) =>
     context.json({ status: 'ok', ruleSetVersion: RULE_SET_VERSION }),
@@ -33,7 +52,7 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
         '',
         'Deterministic pre-payment health checks for OKX.AI and x402 services.',
         '',
-        'POST /v1/scans — submit {"target":"https://..."} for a free preflight.',
+        'POST /v1/scans — submit {"target":"https://..."} for a free GET-only preflight.',
         'GET /v1/scans/:id — retrieve a stored report and evidence hash.',
         'GET /v1/scans/:id/verify — recompute the stored evidence and compare its receipt.',
         'GET /v1/network — aggregates derived only from captured scans.',
@@ -53,7 +72,7 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
           method: 'POST',
           path: '/v1/scans',
           payment: 'free',
-          input: { target: 'HTTPS URL of a public x402 endpoint' },
+          input: { target: 'Complete HTTPS URL of a public x402 GET endpoint' },
         },
       ],
     }),
@@ -98,14 +117,7 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
       return context.json({ error: 'A valid endpoint is required.' }, 400)
     }
     try {
-      const observation = await probeEndpoint(body.target, dependencies)
-      const scan = {
-        id: createId(),
-        evidence: observation,
-        report: evaluatePreflight(observation),
-      }
-      await store.save(scan)
-      return context.json(scan, 201)
+      return context.json(await scanService.scan(body.target), 201)
     } catch (error) {
       return context.json(
         {
@@ -144,6 +156,8 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
     const scan = await store.find(context.req.param('id'))
     return scan ? context.json(scan) : context.json({ error: 'Scan not found.' }, 404)
   })
+
+  app.all('/mcp', (context) => mcpHandler(context.req.raw))
 
   return app
 }

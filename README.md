@@ -1,8 +1,8 @@
 # ASP Pulse
 
-**Know before you pay.** ASP Pulse checks whether an x402 service is callable now, returns a challenge bound to the exact endpoint, and offers supported X Layer payment terms before an agent sends payment.
+**Know before you pay.** ASP Pulse checks whether a public HTTPS GET x402 endpoint is callable now, returns a challenge bound to the exact endpoint, and advertises supported X Layer payment terms before an agent sends payment.
 
-The verdict is deterministic. The same captured evidence and `PULSE-RULESET/1.0.0` produce the same SHA-256 receipt. A free preflight never claims to verify the protected response; that check remains **not tested** unless a real paid canary has succeeded.
+The verdict is deterministic. The same captured evidence and `PULSE-RULESET/1.0.0` produce the same SHA-256 receipt. Rechecking a receipt recomputes the verdict from that stored evidence; it does not repeat the live network request. A free preflight never claims to verify payment settlement or the protected response; those checks remain **not tested** unless separate evidence exists.
 
 ## Run locally
 
@@ -30,18 +30,18 @@ For a conventional host, deploy the web and API as **two separate HTTPS services
 
 1. Deploy the API with `npm run start:api`, a persistent writable volume, and `API_PORT` set to the host's assigned port.
 2. Set `NEXT_PUBLIC_API_URL` to the API's public HTTPS origin, then build and deploy the web with `npm run start:web` and `PORT` set to its host-assigned port.
-3. Confirm `GET /health`, `GET /discover`, and `POST /v1/scans` on the API's public origin before registering it. The browser must make a successful scan against that same public API origin.
+3. Confirm `GET /health`, `GET /discover`, `POST /v1/scans`, and the Streamable HTTP MCP endpoint at `POST /mcp` on the API's public origin before registering it. The browser and an MCP client must each complete a successful preflight against that same public API origin.
 
 `NEXT_PUBLIC_API_URL` is embedded during the web build. Rebuild the web whenever the API origin changes. The default SQLite store is suitable only when the API host guarantees a persistent writable volume; use a production database before deploying to an ephemeral/serverless filesystem.
 
 ### Deploy on Vercel with durable Postgres
 
-ASP Pulse supports a single Vercel project: its Next route handler exposes the API under `/api/*` and preserves the public API contract beneath that prefix (for example `/api/v1/scans` and `/api/discover`).
+ASP Pulse supports a single Vercel project: its Next route handler exposes the API under `/api/*` and preserves the public API and MCP contracts beneath that prefix (for example `/api/v1/scans`, `/api/discover`, and `/api/mcp`).
 
 1. In Vercel, add a Postgres provider from the Marketplace (Neon is supported) and connect it to this project. Vercel injects provider credentials into the project; map the connection string to a **server-only** `DATABASE_URL` environment variable.
 2. Set `NEXT_PUBLIC_API_URL` to `/api` for Production and Preview. This is safe to expose because it is only the same-origin API path—not a credential.
 3. Deploy with the project root set to `apps/web`, enable **Include source files outside of the Root Directory in the Build Step**, and set the Vercel Build Command to `npm run vercel-build`. That command compiles the sibling API workspace before Next bundles the route handler.
-4. After deployment, call `GET /api/health`, `GET /api/discover`, and `POST /api/v1/scans`. If `DATABASE_URL` is absent on Vercel, the API intentionally fails rather than falling back to temporary storage.
+4. After deployment, call `GET /api/health`, `GET /api/discover`, `POST /api/v1/scans`, and use an MCP client against `POST /api/mcp`. If `DATABASE_URL` is absent on Vercel, the API intentionally fails rather than falling back to temporary storage.
 
 For this Vercel configuration, do not use `start:api` or a separate public API origin. Keep `DATABASE_URL` out of `.env` files committed to Git and out of every `NEXT_PUBLIC_*` variable.
 
@@ -62,6 +62,10 @@ npm run verify
 4. X Layer payment terms — `eip155:196`, an officially supported scheme, a supported asset, a positive atomic amount, and valid recipient address.
 5. Advertised price — exact amount/asset comparison when trusted listing metadata is available.
 6. Protected response — real paid-canary schema evidence only; otherwise visibly not tested.
+
+## MCP tool
+
+The Streamable HTTP MCP endpoint is `/mcp` (or `/api/mcp` on Vercel). It exposes `preflight_x402_endpoint` with one argument: `target`, a complete public HTTPS URL. The tool performs the same unauthenticated GET-only preflight as the web scanner and returns the report ID, deterministic verdict, check states, and evidence receipt. It never sends payment.
 
 Public probes reject credentials, nonstandard ports, redirects, oversized bodies, and local/private/reserved IP ranges. DNS answers are pinned into the outbound connection to prevent rebinding after validation.
 
