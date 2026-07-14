@@ -24,7 +24,7 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
   const app = new Hono()
   const store = dependencies.store ?? new MemoryScanStore()
   const now = dependencies.now ?? Date.now
-  const scanLimit = dependencies.scanLimit ?? 10
+  const scanLimit = dependencies.scanLimit ?? 30
   const scanLimitWindowMs = dependencies.scanLimitWindowMs ?? 60 * 60 * 1_000
   const retentionDays = dependencies.retentionDays ?? 30
   let lastPrunedAt = Number.NEGATIVE_INFINITY
@@ -225,5 +225,5 @@ function requestBucket(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const source =
     forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown'
-  return createHash('sha256').update(source).digest('hex')
+  return createHash('sha256').update(`scan-limit-v2:${source}`).digest('hex')
 }

@@ -6,7 +6,7 @@
 
 The verdict is deterministic. The same captured evidence and `PULSE-RULESET/1.0.0` produce the same SHA-256 receipt. Rechecking a receipt recomputes the verdict from that stored evidence; it does not repeat the live network request. A free preflight never claims to verify payment settlement or the protected response; those checks remain **not tested** unless separate evidence exists.
 
-The hosted product is the zero-setup judge path. It accepts only public HTTPS GET endpoints, never sends payment, and offers a one-click rerun of the latest stored preflight-passing public endpoint when evidence is available. Reports are retained for 30 days; scan operations are limited to 10 per anonymous source per hour to protect public targets and the shared service.
+The hosted product is the zero-setup judge path. It accepts only public HTTPS GET endpoints, never sends payment, and offers a one-click rerun of the latest stored preflight-passing public endpoint when evidence is available. Reports are retained for 30 days; scan operations are limited to 30 per anonymous source per hour to protect public targets and the shared service.
 
 ## Run locally
 
