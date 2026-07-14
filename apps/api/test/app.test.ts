@@ -67,6 +67,30 @@ describe('scan API', () => {
     expect(response.status).toBe(400)
   })
 
+  it('limits scan execution per anonymous source without limiting another source', async () => {
+    const app = createApp({
+      now: () => 1_000,
+      scanLimit: 1,
+      resolveHost: publicResolver,
+      fetchImpl: async () => compliantChallenge(),
+    })
+    const request = (source: string) =>
+      app.request('/v1/scans', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-forwarded-for': source,
+        },
+        body: JSON.stringify({ target: 'https://provider.example/service' }),
+      })
+
+    expect((await request('203.0.113.4')).status).toBe(201)
+    const limited = await request('203.0.113.4')
+    expect(limited.status).toBe(429)
+    expect(limited.headers.get('retry-after')).toBe('3599')
+    expect((await request('203.0.113.5')).status).toBe(201)
+  })
+
   it('exposes the real GET-only preflight as an MCP tool', async () => {
     const app = createApp({
       createId: () => 'mcp-scan-1',

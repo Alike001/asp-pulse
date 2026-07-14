@@ -42,12 +42,16 @@ export function Landing() {
       .catch(() => undefined)
   }
 
+  const latestVerifiedTarget = recent.find(
+    ({ report }) => report.verdict === 'preflight_verified',
+  )?.report.target
+
   return (
     <main>
       <SiteHeader />
       <section className="hero shell">
         <div className="hero-copy">
-          <span className="eyebrow">#OKX.AI SERVICE INTELLIGENCE</span>
+          <span className="eyebrow">#X LAYER x402 PREFLIGHT</span>
           <h1>
             Know before
             <br />
@@ -58,11 +62,14 @@ export function Landing() {
             Layer terms before your agent spends.
           </p>
           <a className="text-link" href="#network">
-            See the network pulse <span>→</span>
+            See recent scan evidence <span>→</span>
           </a>
         </div>
         <div className="hero-product">
-          <Scanner onComplete={addScan} />
+          <Scanner
+            onComplete={addScan}
+            {...(latestVerifiedTarget ? { quickTarget: latestVerifiedTarget } : {})}
+          />
         </div>
       </section>
 
@@ -71,13 +78,14 @@ export function Landing() {
         <div className="section-heading">
           <span className="eyebrow">#VERIFICATION</span>
           <h2>
-            Six checks.
+            Three live checks.
             <br />
-            One explainable verdict.
+            Three evidence gates.
           </h2>
           <p>
-            Every label comes from a published rule. Recompute the stored evidence to
-            confirm the same answer.
+            Reachability, a bound x402 challenge, and X Layer payment terms run now.
+            Registry data and paid delivery remain evidence gates until their sources are
+            connected.
           </p>
         </div>
         <div className="check-stack">
@@ -97,9 +105,9 @@ export function Landing() {
       <section className="readiness shell section-pad">
         <span className="eyebrow">#RIGHT NOW</span>
         <h2>
-          Ratings tell you yesterday.
+          Marketplace ratings show history.
           <br />
-          <em>Pulse tells you now.</em>
+          <em>Pulse checks one endpoint.</em>
         </h2>
         <div className="comparison">
           <div>
@@ -112,10 +120,10 @@ export function Landing() {
             →
           </div>
           <div className="current">
-            <span className="comparison-label">Live service readiness</span>
-            <strong>Callable now</strong>
+            <span className="comparison-label">Endpoint preflight</span>
+            <strong>Current HTTP response</strong>
             <strong>Supported payment terms</strong>
-            <strong>Evidence receipt</strong>
+            <strong>Recomputable receipt</strong>
           </div>
         </div>
       </section>
@@ -157,8 +165,8 @@ export function Landing() {
 
 function NetworkRibbon({ pulse }: { pulse: NetworkPulse | undefined }) {
   const values = [
-    ['Services checked', pulse?.servicesChecked],
-    ['Callable now', pulse?.callable],
+    ['Endpoints sampled', pulse?.servicesChecked],
+    ['Passing preflights', pulse?.callable],
     ['x402 failures', pulse?.x402Failures],
     ['Price mismatches', pulse?.priceMismatches],
     [
@@ -171,7 +179,7 @@ function NetworkRibbon({ pulse }: { pulse: NetworkPulse | undefined }) {
       <div className="shell ribbon-inner">
         <div className="ribbon-title">
           <i className="live-dot" />
-          <span>LIVE NETWORK</span>
+          <span>RECENT SCAN EVIDENCE</span>
         </div>
         {values.map(([label, value]) => (
           <div className="metric" key={label}>
@@ -183,10 +191,10 @@ function NetworkRibbon({ pulse }: { pulse: NetworkPulse | undefined }) {
           UPDATED
           <br />
           {pulse?.lastUpdated
-            ? new Date(pulse.lastUpdated).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
+            ? new Intl.DateTimeFormat(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(new Date(pulse.lastUpdated))
             : 'WAITING'}
         </div>
       </div>

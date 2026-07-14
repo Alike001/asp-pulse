@@ -32,4 +32,23 @@ describe('SQLite scan store', () => {
     expect((await store.recent(25))[0]?.id).toBe('stored-1')
     store.close()
   })
+
+  it('enforces a shared-window allowance and removes expired reports', async () => {
+    const store = new SqliteScanStore(':memory:')
+    expect(
+      await store.consumeScanAllowance({
+        bucket: 'anonymous',
+        windowStartedAt: 0,
+        limit: 1,
+      }),
+    ).toEqual({ allowed: true, remaining: 0 })
+    expect(
+      await store.consumeScanAllowance({
+        bucket: 'anonymous',
+        windowStartedAt: 0,
+        limit: 1,
+      }),
+    ).toEqual({ allowed: false, remaining: 0 })
+    store.close()
+  })
 })

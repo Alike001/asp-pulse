@@ -119,6 +119,10 @@
     flex-wrap: wrap;
     gap: 6px 14px;
   }
+  .quick-check {
+    width: calc(100% - 32px);
+    margin: 0 16px 17px;
+  }
   .checks-mini {
     grid-template-columns: 1fr;
   }

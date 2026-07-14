@@ -10,20 +10,20 @@ import { StatusGlyph } from './brand'
 interface ScannerProps {
   onComplete?: (scan: StoredScan) => void
   compact?: boolean
+  quickTarget?: string
 }
 
-export function Scanner({ onComplete, compact = false }: ScannerProps) {
+export function Scanner({ onComplete, compact = false, quickTarget }: ScannerProps) {
   const [target, setTarget] = useState('')
   const [scan, setScan] = useState<StoredScan>()
   const [error, setError] = useState<string>()
   const [running, setRunning] = useState(false)
 
-  async function submit(event: FormEvent) {
-    event.preventDefault()
+  async function run(targetValue: string) {
     setError(undefined)
     setRunning(true)
     try {
-      const result = await createScan(`https://${target.trim()}`)
+      const result = await createScan(targetValue)
       setScan(result)
       onComplete?.(result)
     } catch (caught) {
@@ -31,6 +31,11 @@ export function Scanner({ onComplete, compact = false }: ScannerProps) {
     } finally {
       setRunning(false)
     }
+  }
+
+  async function submit(event: FormEvent) {
+    event.preventDefault()
+    await run(`https://${target.trim()}`)
   }
 
   return (
@@ -74,6 +79,16 @@ export function Scanner({ onComplete, compact = false }: ScannerProps) {
         </div>
       )}
 
+      {!compact && quickTarget && !running && !scan && (
+        <button
+          className="quick-check"
+          type="button"
+          onClick={() => void run(quickTarget)}
+        >
+          Rerun latest verified public endpoint <span>→</span>
+        </button>
+      )}
+
       {running && (
         <div className="scan-progress" role="status">
           <div className="progress-sweep" />
@@ -98,8 +113,8 @@ function ScannerEmpty() {
       <div>
         <strong>Ready for the first check</strong>
         <p>
-          No sample result is shown here. Paste a real public HTTPS GET endpoint to create
-          evidence.
+          Paste a real public HTTPS GET endpoint, or rerun the latest stored verified
+          endpoint when one is available.
         </p>
       </div>
     </div>

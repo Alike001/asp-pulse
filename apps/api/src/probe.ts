@@ -70,7 +70,7 @@ export async function probeEndpoint(
     method: 'GET' as const,
     headers: {
       accept: 'application/json',
-      'user-agent': 'ASP-Pulse/0.1 (+https://asppulse.app)',
+      'user-agent': 'ASP-Pulse/0.1 (+https://asp-pulse.vercel.app/)',
     },
     redirect: 'manual' as const,
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),

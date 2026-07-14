@@ -1,8 +1,12 @@
 # ASP Pulse
 
+**Use the product:** [asp-pulse.vercel.app](https://asp-pulse.vercel.app/) · **MCP endpoint:** `https://asp-pulse.vercel.app/api/mcp`
+
 **Know before you pay.** ASP Pulse checks whether a public HTTPS GET x402 endpoint is callable now, returns a challenge bound to the exact endpoint, and advertises supported X Layer payment terms before an agent sends payment.
 
 The verdict is deterministic. The same captured evidence and `PULSE-RULESET/1.0.0` produce the same SHA-256 receipt. Rechecking a receipt recomputes the verdict from that stored evidence; it does not repeat the live network request. A free preflight never claims to verify payment settlement or the protected response; those checks remain **not tested** unless separate evidence exists.
+
+The hosted product is the zero-setup judge path. It accepts only public HTTPS GET endpoints, never sends payment, and offers a one-click rerun of the latest stored preflight-passing public endpoint when evidence is available. Reports are retained for 30 days; scan operations are limited to 10 per anonymous source per hour to protect public targets and the shared service.
 
 ## Run locally
 
@@ -54,14 +58,14 @@ npm run verify
 
 `verify` checks formatting, lint, strict types, deterministic/API tests, a real Chromium browser path through the scanner's SSRF boundary, WCAG 2.0 A/AA accessibility violations, production builds, and production dependency vulnerabilities at high severity or above. GitHub Actions runs the same gate on every pull request and push to `main`.
 
-## What the six checks mean
+## Three live checks and three evidence gates
 
-1. Discovery metadata — verified listing data, when supplied.
-2. Endpoint reachability — live HTTP 402 response.
-3. x402 challenge — canonical base64 `PAYMENT-REQUIRED` header or compatible JSON body, parsed as x402 v2 and bound to the scanned resource URL.
-4. X Layer payment terms — `eip155:196`, an officially supported scheme, a supported asset, a positive atomic amount, and valid recipient address.
-5. Advertised price — exact amount/asset comparison when trusted listing metadata is available.
-6. Protected response — real paid-canary schema evidence only; otherwise visibly not tested.
+1. Endpoint reachability — live HTTP 402 response.
+2. x402 challenge — canonical base64 `PAYMENT-REQUIRED` header or compatible JSON body, parsed as x402 v2 and bound to the scanned resource URL.
+3. X Layer payment terms — `eip155:196`, an officially supported scheme, a supported asset, a positive atomic amount, and valid recipient address.
+4. Discovery metadata — an evidence gate until trusted OKX.AI listing data is supplied.
+5. Advertised price — an evidence gate until trusted listing metadata supplies the amount and asset.
+6. Protected response — an evidence gate; real paid-canary schema evidence is required and otherwise it remains visibly not tested.
 
 ## MCP tool
 

@@ -72,6 +72,33 @@ test('a successful browser scan opens a report and recomputes its stored receipt
   await expect(page.getByText('Receipt matches recomputed evidence.')).toBeVisible()
 })
 
+test('a judge can rerun the latest stored preflight-passing public endpoint in one click', async ({
+  page,
+}) => {
+  await page.route('**/v1/scans', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        json: { scans: [scan] },
+      })
+      return
+    }
+    if (route.request().method() === 'POST') {
+      expect(route.request().postDataJSON()).toEqual({ target: scan.report.target })
+      await route.fulfill({ status: 201, contentType: 'application/json', json: scan })
+      return
+    }
+    await route.continue()
+  })
+
+  await page.goto('/')
+  await page
+    .getByRole('button', { name: /Rerun latest verified public endpoint/ })
+    .click()
+  await expect(page.getByRole('heading', { name: 'Preflight verified' })).toBeVisible()
+})
+
 test('scanner remains keyboard reachable and usable on a phone viewport', async ({
   page,
 }) => {

@@ -4,9 +4,10 @@ import * as z from 'zod/v4'
 import type { ScanService } from './scan-service.js'
 
 export function createMcpHandler(
-  scanService: ScanService,
+  scanServiceForRequest: (request: Request) => ScanService,
 ): (request: Request) => Promise<Response> {
   return async (request) => {
+    const scanService = scanServiceForRequest(request)
     const transport = new WebStandardStreamableHTTPServerTransport({
       enableJsonResponse: true,
     })

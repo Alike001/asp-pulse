@@ -1,6 +1,6 @@
 import { neon } from '@neondatabase/serverless'
 import type { PreflightObservation, ScanReport } from '@asp-pulse/core'
-import type { ScanStore, StoredScan } from './store.js'
+import type { ScanAllowance, ScanAllowanceInput, ScanStore, StoredScan } from './store.js'
 
 interface ScanRow {
   id: string
@@ -29,6 +29,17 @@ export class PostgresScanStore implements ScanStore {
     )
     await this.client.query(
       'CREATE INDEX IF NOT EXISTS scans_checked_at ON scans (checked_at DESC)',
+    )
+    await this.client.query(`
+      CREATE TABLE IF NOT EXISTS scan_rate_limits (
+        bucket TEXT NOT NULL,
+        window_started_at TIMESTAMPTZ NOT NULL,
+        request_count INTEGER NOT NULL,
+        PRIMARY KEY (bucket, window_started_at)
+      )
+    `)
+    await this.client.query(
+      'CREATE INDEX IF NOT EXISTS scan_rate_limits_window ON scan_rate_limits (window_started_at)',
     )
   }
 
@@ -65,6 +76,33 @@ export class PostgresScanStore implements ScanStore {
       [safeLimit],
     )
     return rows.map(readRow)
+  }
+
+  async consumeScanAllowance({
+    bucket,
+    windowStartedAt,
+    limit,
+  }: ScanAllowanceInput): Promise<ScanAllowance> {
+    const rows = await this.client.query(
+      `INSERT INTO scan_rate_limits (bucket, window_started_at, request_count)
+       VALUES ($1, to_timestamp($2 / 1000.0), 1)
+       ON CONFLICT (bucket, window_started_at) DO UPDATE SET
+         request_count = scan_rate_limits.request_count + 1
+       WHERE scan_rate_limits.request_count < $3
+       RETURNING request_count`,
+      [bucket, windowStartedAt, limit],
+    )
+    const consumed = Number(rows[0]?.request_count)
+    return Number.isFinite(consumed)
+      ? { allowed: true, remaining: Math.max(0, limit - consumed) }
+      : { allowed: false, remaining: 0 }
+  }
+
+  async prune(before: string): Promise<void> {
+    await this.client.query('DELETE FROM scans WHERE checked_at < $1', [before])
+    await this.client.query('DELETE FROM scan_rate_limits WHERE window_started_at < $1', [
+      before,
+    ])
   }
 }
 
