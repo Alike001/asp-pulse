@@ -19,7 +19,10 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc -b packages/core apps/api apps/worker --pretty false && tsc -p apps/web/tsconfig.json --noEmit --pretty false",
     "test": "vitest run",
+    "test:integration": "vitest run apps/api/test",
+    "test:browser": "npm run build && playwright test",
     "test:watch": "vitest",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
     "build:services": "tsc -b packages/core apps/api apps/worker",
     "build:web": "next build apps/web",
     "build": "npm run build:services && npm run build:web",
@@ -27,9 +30,11 @@
     "start": "node scripts/start.mjs",
     "start:api": "npm run build:services && npm run start -w @asp-pulse/api",
     "start:web": "npm run build:web && npm run start -w @asp-pulse/web",
-    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build"
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run test:browser && npm run audit:prod"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

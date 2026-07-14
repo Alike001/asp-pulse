@@ -34,6 +34,15 @@ Deploy the web and API as **two separate HTTPS services**. Do not use the combin
 
 `NEXT_PUBLIC_API_URL` is embedded during the web build. Rebuild the web whenever the API origin changes. The default SQLite store is suitable only when the API host guarantees a persistent writable volume; use a production database before deploying to an ephemeral/serverless filesystem.
 
+## Quality gate
+
+```bash
+npx playwright install chromium
+npm run verify
+```
+
+`verify` checks formatting, lint, strict types, deterministic/API tests, a real Chromium browser path through the scanner's SSRF boundary, WCAG 2.0 A/AA accessibility violations, production builds, and production dependency vulnerabilities at high severity or above. GitHub Actions runs the same gate on every pull request and push to `main`.
+
 ## What the six checks mean
 
 1. Discovery metadata — verified listing data, when supplied.
