@@ -1,8 +1,9 @@
-import type { ScanReport } from '@asp-pulse/core'
+import type { PreflightObservation, ScanReport } from '@asp-pulse/core'
 
 export interface StoredScan {
   id: string
   report: ScanReport
+  evidence?: PreflightObservation
 }
 
 export interface ScanStore {

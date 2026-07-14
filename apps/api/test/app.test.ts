@@ -46,6 +46,10 @@ describe('scan API', () => {
 
     const replay = await app.request('/v1/scans/scan-1')
     expect(replay.status).toBe(200)
+
+    const verification = await app.request('/v1/scans/scan-1/verify')
+    expect(verification.status).toBe(200)
+    expect((await verification.json()).valid).toBe(true)
   })
 
   it('rejects local targets before fetching', async () => {

@@ -21,7 +21,12 @@ export default function ApiReferencePage() {
           <article>
             <span className="mono">GET</span>
             <h2>/v1/scans/:id</h2>
-            <p>Replay a stored scan and its evidence receipt.</p>
+            <p>Read a stored scan and its evidence receipt.</p>
+          </article>
+          <article>
+            <span className="mono">GET</span>
+            <h2>/v1/scans/:id/verify</h2>
+            <p>Recompute the stored evidence and compare its receipt.</p>
           </article>
           <article>
             <span className="mono">GET</span>

@@ -34,7 +34,8 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
         'Deterministic pre-payment health checks for OKX.AI and x402 services.',
         '',
         'POST /v1/scans — submit {"target":"https://..."} for a free preflight.',
-        'GET /v1/scans/:id — retrieve a replayable report and evidence hash.',
+        'GET /v1/scans/:id — retrieve a stored report and evidence hash.',
+        'GET /v1/scans/:id/verify — recompute the stored evidence and compare its receipt.',
         'GET /v1/network — aggregates derived only from captured scans.',
         '',
         'The free preflight never sends payment. Protected delivery remains not tested.',
@@ -98,7 +99,11 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
     }
     try {
       const observation = await probeEndpoint(body.target, dependencies)
-      const scan = { id: createId(), report: evaluatePreflight(observation) }
+      const scan = {
+        id: createId(),
+        evidence: observation,
+        report: evaluatePreflight(observation),
+      }
       await store.save(scan)
       return context.json(scan, 201)
     } catch (error) {
@@ -113,6 +118,27 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
   })
 
   app.get('/v1/scans', async (context) => context.json({ scans: await store.recent(25) }))
+
+  app.get('/v1/scans/:id/evidence', async (context) => {
+    const scan = await store.find(context.req.param('id'))
+    if (!scan) return context.json({ error: 'Scan not found.' }, 404)
+    if (!scan.evidence)
+      return context.json({ error: 'Evidence unavailable for this legacy scan.' }, 409)
+    return context.json({ id: scan.id, evidence: scan.evidence })
+  })
+
+  app.get('/v1/scans/:id/verify', async (context) => {
+    const scan = await store.find(context.req.param('id'))
+    if (!scan) return context.json({ error: 'Scan not found.' }, 404)
+    if (!scan.evidence)
+      return context.json({ error: 'Evidence unavailable for this legacy scan.' }, 409)
+    const report = evaluatePreflight(scan.evidence)
+    return context.json({
+      id: scan.id,
+      valid: report.evidenceHash === scan.report.evidenceHash,
+      report,
+    })
+  })
 
   app.get('/v1/scans/:id', async (context) => {
     const scan = await store.find(context.req.param('id'))
