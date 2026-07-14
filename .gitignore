@@ -14,3 +14,12 @@ artifacts/
 *.log
 .DS_Store
 research/reference-repos/
+
+# Local project research and operating notes — never publish.
+AGENTS.md
+PROMPTS.md
+design.doc.md
+handoff.md
+log.md
+research-intake.md
+research/
