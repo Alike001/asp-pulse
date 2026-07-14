@@ -1,4 +1,4 @@
-import type { NetworkPulse, StoredScan } from './types'
+import type { NetworkPulse, ScanVerification, StoredScan } from './types'
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8787'
 
@@ -29,4 +29,10 @@ export async function getRecentScans(): Promise<StoredScan[]> {
 
 export async function getScan(id: string): Promise<StoredScan> {
   return decode<StoredScan>(await fetch(`${API_URL}/v1/scans/${encodeURIComponent(id)}`))
+}
+
+export async function verifyScan(id: string): Promise<ScanVerification> {
+  return decode<ScanVerification>(
+    await fetch(`${API_URL}/v1/scans/${encodeURIComponent(id)}/verify`),
+  )
 }

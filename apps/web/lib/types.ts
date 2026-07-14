@@ -25,6 +25,12 @@ export interface StoredScan {
   report: ScanReport
 }
 
+export interface ScanVerification {
+  id: string
+  valid: boolean
+  report: ScanReport
+}
+
 export interface NetworkPulse {
   servicesChecked: number
   callable: number

@@ -1,13 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getScan } from '@/lib/api'
-import type { StoredScan } from '@/lib/types'
+import { getScan, verifyScan } from '@/lib/api'
+import type { ScanVerification, StoredScan } from '@/lib/types'
 import { StatusGlyph } from './brand'
 
 export function Report({ id }: { id: string }) {
   const [scan, setScan] = useState<StoredScan>()
   const [error, setError] = useState<string>()
+  const [verification, setVerification] = useState<ScanVerification>()
+  const [verifying, setVerifying] = useState(false)
 
   useEffect(() => {
     getScan(id)
@@ -33,6 +35,18 @@ export function Report({ id }: { id: string }) {
     )
 
   const { report } = scan
+  async function recheckReceipt() {
+    setVerifying(true)
+    try {
+      setVerification(await verifyScan(id))
+    } catch (reason) {
+      setError(
+        reason instanceof Error ? reason.message : 'Receipt could not be rechecked.',
+      )
+    } finally {
+      setVerifying(false)
+    }
+  }
   return (
     <div className="report-page">
       <header className={`report-verdict verdict-${report.verdict}`}>
@@ -83,9 +97,19 @@ export function Report({ id }: { id: string }) {
           <strong>{report.evidenceHash}</strong>
         </div>
         <p>
-          This receipt is generated from canonicalized input evidence. Replaying identical
-          evidence through this rule set produces the same hash and verdict.
+          This receipt is generated from stored evidence. Recheck it to recompute the
+          verdict and confirm that the stored receipt still matches.
         </p>
+        <button type="button" onClick={recheckReceipt} disabled={verifying}>
+          {verifying ? 'Rechecking…' : 'Recheck receipt'}
+        </button>
+        {verification && (
+          <strong className={verification.valid ? 'status-pass' : 'status-fail'}>
+            {verification.valid
+              ? 'Receipt matches recomputed evidence.'
+              : 'Receipt mismatch.'}
+          </strong>
+        )}
       </section>
     </div>
   )
