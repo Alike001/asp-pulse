@@ -37,12 +37,10 @@ function verdictFor(checks: CheckResult[]): Verdict {
   if (checks.some((item) => item.status === 'fail' || item.status === 'warning')) {
     return 'degraded'
   }
-  const response = checks.find((item) => item.id === 'response_contract')
-  return response?.status === 'pass' ? 'verified' : 'preflight_verified'
+  return 'preflight_verified'
 }
 
 const verdictLabels: Record<Verdict, string> = {
-  verified: 'Fully verified',
   preflight_verified: 'Preflight verified',
   degraded: 'Degraded',
   invalid: 'Invalid',
@@ -51,29 +49,13 @@ const verdictLabels: Record<Verdict, string> = {
 export function evaluatePreflight(observation: PreflightObservation): ScanReport {
   const challenge = parseX402Challenge(observation.challengeBody)
   const compatible = challenge?.accepts.filter(isXLayerCompatible)
-  const advertised = observation.advertisedService
-  const canary = observation.canary
-
   const checks: CheckResult[] = [
-    advertised
-      ? check(
-          'discovery',
-          'Discovery metadata',
-          'pass',
-          'Service metadata was resolved.',
-          {
-            observed: {
-              agentId: advertised.agentId,
-              serviceName: advertised.serviceName,
-            },
-          },
-        )
-      : check(
-          'discovery',
-          'Discovery metadata',
-          'not_tested',
-          'Direct endpoint scan; registry metadata was not supplied.',
-        ),
+    check(
+      'discovery',
+      'Discovery metadata',
+      'not_tested',
+      'Trusted OKX.AI registry metadata is not connected in version one.',
+    ),
     observation.error
       ? check('reachability', 'Endpoint reachability', 'fail', observation.error)
       : check(
@@ -122,34 +104,18 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
             })),
           },
         ),
-    advertised?.amountAtomic && advertised.asset
-      ? evaluatePrice(advertised.amountAtomic, advertised.asset, compatible ?? [])
-      : check(
-          'price',
-          'Advertised price',
-          'not_tested',
-          'An atomic advertised amount and asset are required for comparison.',
-        ),
-    canary?.paid && canary.schemaMatched === true
-      ? check(
-          'response_contract',
-          'Protected response',
-          'pass',
-          'Paid canary matched schema.',
-          {
-            observed: {
-              completedAt: canary.completedAt,
-              schemaName: canary.schemaName,
-              transactionHash: canary.transactionHash,
-            },
-          },
-        )
-      : check(
-          'response_contract',
-          'Protected response',
-          'not_tested',
-          'No successful paid canary evidence is attached.',
-        ),
+    check(
+      'price',
+      'Advertised price',
+      'not_tested',
+      'Price verification is unavailable in version one.',
+    ),
+    check(
+      'response_contract',
+      'Protected response',
+      'not_tested',
+      'Paid delivery verification is unavailable in version one.',
+    ),
   ]
 
   const verdict = verdictFor(checks)
@@ -246,31 +212,5 @@ function isXLayerCompatible(requirement: {
     /^\d+$/.test(requirement.amount) &&
     BigInt(requirement.amount) > 0n &&
     /^0x[a-f\d]{40}$/i.test(requirement.payTo)
-  )
-}
-
-function evaluatePrice(
-  amountAtomic: string,
-  asset: string,
-  requirements: Array<{ amount: string; asset: string }>,
-): CheckResult {
-  const match = requirements.some(
-    (item) =>
-      item.asset.toLowerCase() === asset.toLowerCase() && item.amount === amountAtomic,
-  )
-  return check(
-    'price',
-    'Advertised price',
-    match ? 'pass' : 'fail',
-    match
-      ? 'Challenge matches the advertised price.'
-      : 'Challenge price differs from metadata.',
-    {
-      expected: { amountAtomic, asset },
-      observed: requirements.map(({ amount, asset: observedAsset }) => ({
-        amountAtomic: amount,
-        asset: observedAsset,
-      })),
-    },
   )
 }

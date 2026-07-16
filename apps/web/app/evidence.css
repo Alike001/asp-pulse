@@ -84,8 +84,7 @@
   border-radius: 99px;
   font-size: 0.62rem;
 }
-.verdict-preflight_verified,
-.verdict-verified {
+.verdict-preflight_verified {
   color: var(--signal);
 }
 .verdict-degraded {

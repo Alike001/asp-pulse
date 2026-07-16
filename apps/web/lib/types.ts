@@ -14,7 +14,7 @@ export interface ScanReport {
   target: string
   checkedAt: string
   latencyMs: number
-  verdict: 'verified' | 'preflight_verified' | 'degraded' | 'invalid'
+  verdict: 'preflight_verified' | 'degraded' | 'invalid'
   verdictLabel: string
   checks: CheckResult[]
   evidenceHash: string
@@ -35,7 +35,7 @@ export interface NetworkPulse {
   servicesChecked: number
   callable: number
   x402Failures: number
-  priceMismatches: number
+  priceChecksRun: number
   medianLatencyMs: number | null
   lastUpdated: string | null
 }

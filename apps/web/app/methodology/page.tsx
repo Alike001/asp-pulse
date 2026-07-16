@@ -3,7 +3,7 @@ import { SiteHeader } from '@/components/site-header'
 const rules = [
   [
     'Discovery metadata',
-    'Not tested for a direct URL scan. Passes only when verified OKX.AI listing metadata is supplied.',
+    'Not available in version one. Trusted OKX.AI registry metadata is not connected to public direct scans.',
   ],
   [
     'Endpoint reachability',
@@ -19,11 +19,11 @@ const rules = [
   ],
   [
     'Advertised price',
-    'Compares atomic amount and asset exactly when trusted listing metadata is available; otherwise it is not tested.',
+    'Not available in version one. ASP Pulse does not claim price verification without trusted listing metadata.',
   ],
   [
     'Protected response',
-    'Passes only with recorded evidence from a successful paid canary whose response matches the declared schema. It is never inferred from the free preflight.',
+    'Not available in version one. A free preflight never pays, settles, or inspects protected delivery.',
   ],
 ]
 
@@ -35,8 +35,8 @@ export default function MethodologyPage() {
         <span className="eyebrow">#PULSE-RULESET/1.0.0</span>
         <h1>Evidence before confidence.</h1>
         <p className="document-lead">
-          ASP Pulse does not ask an AI model to invent a trust score. It applies six
-          visible rules to observations captured from a service endpoint. Identical
+          ASP Pulse does not ask an AI model to invent a trust score. It applies three
+          live checks and preserves three unavailable evidence gates. Identical captured
           evidence produces an identical verdict and receipt hash.
         </p>
         <div className="rule-list">
@@ -55,9 +55,8 @@ export default function MethodologyPage() {
           <h2>Free preflight is not paid delivery proof.</h2>
           <p>
             A payment-free request can verify the service’s HTTP 402 challenge, network,
-            asset, and protocol shape. It cannot see a protected response. Until the
-            separately controlled paid canary is enabled and succeeds, that final check
-            remains visibly marked “not tested.”
+            asset, and protocol shape. It cannot see a protected response, submit a
+            payment, or prove settlement. Those checks remain visibly marked “not tested.”
           </p>
         </section>
       </section>

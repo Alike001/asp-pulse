@@ -13,6 +13,16 @@ export interface ValidatedTarget {
   addresses: ResolvedAddress[]
 }
 
+const E2E_FIXTURE_TARGET = 'http://127.0.0.1:8788/x402'
+
+function isE2eFixtureTarget(input: string): boolean {
+  return (
+    process.env.PULSE_E2E_FIXTURE === '1' &&
+    process.env.VERCEL !== '1' &&
+    input === E2E_FIXTURE_TARGET
+  )
+}
+
 function blockedIpv4(address: string): boolean {
   const octets = address.split('.').map(Number)
   const [a, b = 0, c = 0] = octets
@@ -66,6 +76,10 @@ export async function validatePublicTarget(
     target = new URL(input)
   } catch {
     throw new Error('Enter a complete HTTPS endpoint.')
+  }
+
+  if (isE2eFixtureTarget(input)) {
+    return { url: target, addresses: [{ address: '127.0.0.1', family: 4 }] }
   }
 
   if (target.protocol !== 'https:') {

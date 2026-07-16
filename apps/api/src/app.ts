@@ -118,16 +118,17 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
       if (!latestByTarget.has(report.target)) latestByTarget.set(report.target, report)
     }
     const reports = [...latestByTarget.values()]
-    const passingPreflights = reports.filter((report) =>
-      ['verified', 'preflight_verified'].includes(report.verdict),
+    const passingPreflights = reports.filter(
+      (report) => report.verdict === 'preflight_verified',
+    ).length
+    const priceChecksRun = reports.filter(
+      (report) => report.checks.find(({ id }) => id === 'price')?.status !== 'not_tested',
     ).length
     return context.json({
       servicesChecked: reports.length,
       callable: passingPreflights,
       x402Failures: reports.filter((report) => report.verdict === 'invalid').length,
-      priceMismatches: reports.filter(
-        (report) => report.checks.find(({ id }) => id === 'price')?.status === 'fail',
-      ).length,
+      priceChecksRun,
       medianLatencyMs: median(reports.map(({ latencyMs }) => latencyMs)),
       lastUpdated: reports[0]?.checkedAt ?? null,
     })

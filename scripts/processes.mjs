@@ -1,9 +1,13 @@
 import { spawn } from 'node:child_process'
 
-export function runProduct(mode) {
+export function runProduct(mode, { environment = {}, onStop } = {}) {
+  const environmentWithDefaults = { ...process.env, ...environment }
   const api = spawn(process.execPath, ['apps/api/dist/server.js'], {
     stdio: 'inherit',
-    env: { ...process.env, API_PORT: process.env.API_PORT ?? '8787' },
+    env: {
+      ...environmentWithDefaults,
+      API_PORT: environmentWithDefaults.API_PORT ?? '8787',
+    },
   })
   const next = spawn(
     process.execPath,
@@ -12,14 +16,21 @@ export function runProduct(mode) {
       mode,
       'apps/web',
       '--port',
-      process.env.WEB_PORT ?? '3000',
+      environmentWithDefaults.WEB_PORT ?? '3000',
     ],
-    { stdio: 'inherit', env: { ...process.env, PORT: process.env.WEB_PORT ?? '3000' } },
+    {
+      stdio: 'inherit',
+      env: {
+        ...environmentWithDefaults,
+        PORT: environmentWithDefaults.WEB_PORT ?? '3000',
+      },
+    },
   )
   const children = [api, next]
 
   function stop(signal) {
     for (const child of children) child.kill(signal)
+    onStop?.()
   }
   process.on('SIGINT', () => stop('SIGINT'))
   process.on('SIGTERM', () => stop('SIGTERM'))

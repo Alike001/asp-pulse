@@ -9,7 +9,7 @@ export const CHECK_IDS = [
 
 export type CheckId = (typeof CHECK_IDS)[number]
 export type CheckStatus = 'pass' | 'warning' | 'fail' | 'not_tested'
-export type Verdict = 'verified' | 'preflight_verified' | 'degraded' | 'invalid'
+export type Verdict = 'preflight_verified' | 'degraded' | 'invalid'
 
 export interface PaymentRequirement {
   scheme: string
@@ -30,32 +30,12 @@ export interface X402Challenge {
   accepts: PaymentRequirement[]
 }
 
-export interface AdvertisedService {
-  agentId: string
-  serviceName: string
-  endpoint: string
-  network?: string
-  asset?: string
-  amountAtomic?: string
-}
-
-export interface CanaryObservation {
-  paid: boolean
-  completedAt: string
-  transactionHash?: string
-  statusCode?: number
-  schemaMatched?: boolean
-  schemaName?: string
-}
-
 export interface PreflightObservation {
   target: string
   checkedAt: string
   latencyMs: number
   httpStatus?: number
   challengeBody?: unknown
-  advertisedService?: AdvertisedService
-  canary?: CanaryObservation
   error?: string
 }
 

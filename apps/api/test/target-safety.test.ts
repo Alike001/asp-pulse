@@ -31,4 +31,10 @@ describe('target safety', () => {
       ]),
     ).rejects.toThrow('Only public HTTPS endpoints')
   })
+
+  it('does not allow the e2e fixture without its explicit runtime flag', async () => {
+    await expect(validatePublicTarget('http://127.0.0.1:8788/x402')).rejects.toThrow(
+      'Only public HTTPS endpoints',
+    )
+  })
 })

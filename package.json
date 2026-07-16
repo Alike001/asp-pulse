@@ -20,7 +20,7 @@
     "typecheck": "tsc -b packages/core apps/api apps/worker --pretty false && tsc -p apps/web/tsconfig.json --noEmit --pretty false",
     "test": "vitest run",
     "test:integration": "vitest run apps/api/test",
-    "test:browser": "npm run build && playwright test",
+    "test:browser": "node scripts/test-browser.mjs",
     "test:watch": "vitest",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "build:services": "tsc -b packages/core apps/api apps/worker",

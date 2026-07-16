@@ -88,28 +88,17 @@ describe('evaluatePreflight', () => {
     )
   })
 
-  it('returns verified only when a paid canary matched the protected schema', () => {
+  it('never promotes a public report beyond preflight verification', () => {
     const report = evaluatePreflight({
       ...baseObservation,
       challengeBody: validChallenge(),
-      advertisedService: {
-        agentId: '1960',
-        serviceName: 'Price oracle',
-        endpoint: baseObservation.target,
-        amountAtomic: '500',
-        asset: X_LAYER_ASSETS.USDG,
-      },
-      canary: {
-        paid: true,
-        completedAt: baseObservation.checkedAt,
-        schemaMatched: true,
-        schemaName: 'price-oracle/v1',
-        transactionHash: '0xabc',
-      },
     })
 
-    expect(report.verdict).toBe('verified')
-    expect(report.checks.every((item) => item.status === 'pass')).toBe(true)
+    expect(report.verdict).toBe('preflight_verified')
+    expect(report.checks.find((item) => item.id === 'price')?.status).toBe('not_tested')
+    expect(report.checks.find((item) => item.id === 'response_contract')?.status).toBe(
+      'not_tested',
+    )
   })
 
   it('produces the same evidence hash for equivalent object key ordering', () => {

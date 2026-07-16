@@ -43,9 +43,38 @@ test('landing presents a usable, accessible real scanner', async ({ page }) => {
   expect(violations).toEqual([])
 })
 
-test('a successful browser scan opens a report and recomputes its stored receipt', async ({
+test('a real browser preflight stores evidence and recomputes its receipt', async ({
   page,
 }) => {
+  await page.goto('/')
+  const endpoint = page.getByLabel('x402 service endpoint').first()
+  const submit = page.getByRole('button', { name: 'Check service' }).first()
+  await endpoint.fill('http://127.0.0.1:8788/x402')
+
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().endsWith('/v1/scans') &&
+        response.request().method() === 'POST' &&
+        response.status() === 201,
+    ),
+    submit.click(),
+  ])
+
+  await expect(page.getByRole('heading', { name: 'Preflight verified' })).toBeVisible()
+  await page.getByRole('link', { name: 'Open full evidence report →' }).click()
+  await expect(page.getByText('http://127.0.0.1:8788/x402')).toBeVisible()
+  await expect(
+    page.getByText('Price verification is unavailable in version one.'),
+  ).toBeVisible()
+  await expect(
+    page.getByText('Paid delivery verification is unavailable in version one.'),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Recheck receipt' }).click()
+  await expect(page.getByText('Receipt matches recomputed evidence.')).toBeVisible()
+})
+
+test('renders a fixture report for UI-flow coverage', async ({ page }) => {
   await page.route('**/v1/scans', async (route) => {
     if (route.request().method() !== 'POST') return route.continue()
     await route.fulfill({ status: 201, contentType: 'application/json', json: scan })
@@ -129,7 +158,7 @@ const scan: StoredScan = {
         id: 'discovery',
         label: 'Discovery metadata',
         status: 'not_tested',
-        summary: 'Direct endpoint scan; registry metadata was not supplied.',
+        summary: 'Trusted OKX.AI registry metadata is not connected in version one.',
       },
       {
         id: 'reachability',
@@ -153,13 +182,13 @@ const scan: StoredScan = {
         id: 'price',
         label: 'Advertised price',
         status: 'not_tested',
-        summary: 'An atomic advertised amount and asset are required for comparison.',
+        summary: 'Price verification is unavailable in version one.',
       },
       {
         id: 'response_contract',
         label: 'Protected response',
         status: 'not_tested',
-        summary: 'No successful paid canary evidence is attached.',
+        summary: 'Paid delivery verification is unavailable in version one.',
       },
     ],
   },

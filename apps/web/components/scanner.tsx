@@ -7,6 +7,8 @@ import { createScan } from '@/lib/api'
 import type { StoredScan } from '@/lib/types'
 import { StatusGlyph } from './brand'
 
+const e2eFixtureEnabled = process.env.NEXT_PUBLIC_PULSE_E2E_FIXTURE === '1'
+
 interface ScannerProps {
   onComplete?: (scan: StoredScan) => void
   compact?: boolean
@@ -35,7 +37,12 @@ export function Scanner({ onComplete, compact = false, quickTarget }: ScannerPro
 
   async function submit(event: FormEvent) {
     event.preventDefault()
-    await run(`https://${target.trim()}`)
+    const candidate = target.trim()
+    await run(
+      e2eFixtureEnabled && candidate.startsWith('http://')
+        ? candidate
+        : `https://${candidate.replace(/^https?:\/\//, '')}`,
+    )
   }
 
   return (
@@ -58,9 +65,10 @@ export function Scanner({ onComplete, compact = false, quickTarget }: ScannerPro
           <input
             id={compact ? 'closing-target' : 'scan-target'}
             value={target}
-            onChange={(event) =>
-              setTarget(event.target.value.replace(/^https?:\/\//, ''))
-            }
+            onChange={(event) => {
+              const value = event.target.value
+              setTarget(e2eFixtureEnabled ? value : value.replace(/^https?:\/\//, ''))
+            }}
             placeholder="service.example.com/paid-route"
             autoComplete="url"
             required

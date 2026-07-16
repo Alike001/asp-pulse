@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getNetworkPulse, getRecentScans } from '@/lib/api'
+import { OKX_AI_LISTING_URL } from '@/lib/okx'
 import type { NetworkPulse, StoredScan } from '@/lib/types'
 import { Scanner } from './scanner'
 import { SiteHeader } from './site-header'
@@ -16,8 +17,8 @@ const checkCopy = [
     'X Layer payment terms',
     'Does it name chain 196, a supported scheme and asset?',
   ],
-  ['05', 'Advertised price', 'Does the live price match the listing?'],
-  ['06', 'Protected response', 'Did a paid canary deliver the promised schema?'],
+  ['05', 'Advertised price', 'Unavailable until trusted listing metadata is connected.'],
+  ['06', 'Protected response', 'Unavailable in this payment-free preflight.'],
 ]
 
 export function Landing() {
@@ -63,6 +64,9 @@ export function Landing() {
           </p>
           <a className="text-link" href="#network">
             See recent scan evidence <span>→</span>
+          </a>
+          <a className="text-link" href={OKX_AI_LISTING_URL}>
+            View Agent #5786 on OKX.AI <span>↗</span>
           </a>
         </div>
         <div className="hero-product">
@@ -164,11 +168,17 @@ export function Landing() {
 }
 
 function NetworkRibbon({ pulse }: { pulse: NetworkPulse | undefined }) {
+  const priceEvidence =
+    pulse?.priceChecksRun === undefined
+      ? undefined
+      : pulse.priceChecksRun === 0
+        ? 'Not connected'
+        : `${pulse.priceChecksRun} checked`
   const values = [
     ['Endpoints sampled', pulse?.servicesChecked],
     ['Passing preflights', pulse?.callable],
     ['x402 failures', pulse?.x402Failures],
-    ['Price mismatches', pulse?.priceMismatches],
+    ['Price evidence', priceEvidence],
     [
       'Median latency',
       pulse?.medianLatencyMs == null ? undefined : `${pulse.medianLatencyMs} ms`,
@@ -210,7 +220,7 @@ function RecentScans({ scans }: { scans: StoredScan[] }) {
           <span className="eyebrow">#PUBLIC EVIDENCE</span>
           <h2>Recent verifications</h2>
         </div>
-        <span className="mono">LIVE · {scans.length} RECORDS</span>
+        <span className="mono">PUBLIC EVIDENCE · {scans.length} RECENT RECORDS</span>
       </div>
       {scans.length === 0 ? (
         <div className="table-empty">
@@ -258,8 +268,8 @@ function Footer() {
       <div className="footer-links">
         <a href="/methodology">Methodology</a>
         <a href="/api-reference">API</a>
-        <a href="https://www.okx.ai/">OKX.AI</a>
-        <span>Paid canary disabled</span>
+        <a href={OKX_AI_LISTING_URL}>Agent #5786 on OKX.AI</a>
+        <span>No payment or settlement</span>
       </div>
     </footer>
   )

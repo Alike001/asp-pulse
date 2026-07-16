@@ -1,6 +1,6 @@
 # ASP Pulse
 
-**Use the product:** [asp-pulse.vercel.app](https://asp-pulse.vercel.app/) · **MCP endpoint:** `https://asp-pulse.vercel.app/api/mcp`
+**Use the product:** [asp-pulse.vercel.app](https://asp-pulse.vercel.app/) · **OKX.AI listing:** [Agent #5786](https://www.okx.ai/agents/5786?source=search) · **MCP endpoint:** `https://asp-pulse.vercel.app/api/mcp`
 
 **Know before you pay.** ASP Pulse checks whether a public HTTPS GET x402 endpoint is callable now, returns a challenge bound to the exact endpoint, and advertises supported X Layer payment terms before an agent sends payment.
 
@@ -63,9 +63,9 @@ npm run verify
 1. Endpoint reachability — live HTTP 402 response.
 2. x402 challenge — canonical base64 `PAYMENT-REQUIRED` header or compatible JSON body, parsed as x402 v2 and bound to the scanned resource URL.
 3. X Layer payment terms — `eip155:196`, an officially supported scheme, a supported asset, a positive atomic amount, and valid recipient address.
-4. Discovery metadata — an evidence gate until trusted OKX.AI listing data is supplied.
-5. Advertised price — an evidence gate until trusted listing metadata supplies the amount and asset.
-6. Protected response — an evidence gate; real paid-canary schema evidence is required and otherwise it remains visibly not tested.
+4. Discovery metadata — unavailable in version one because trusted OKX.AI registry metadata is not connected.
+5. Advertised price — unavailable in version one; ASP Pulse never claims price verification without trusted listing metadata.
+6. Protected response — unavailable in version one; the free preflight never pays, settles, or inspects protected delivery.
 
 ## MCP tool
 
