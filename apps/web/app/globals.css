@@ -9,7 +9,7 @@
   --info: #6ec8ff;
   --warning: #ffb547;
   --failure: #f05d5e;
-  --shell: min(1380px, calc(100vw - 64px));
+  --shell: min(1380px, calc(100% - 64px));
 }
 
 * {
@@ -21,6 +21,7 @@ html {
 }
 body {
   margin: 0;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--text);
   font-family: Geist, Inter, ui-sans-serif, system-ui, sans-serif;

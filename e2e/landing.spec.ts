@@ -12,6 +12,23 @@ test('landing presents a usable, accessible real scanner', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.getByRole('heading', { name: 'Know before you pay.' })).toBeVisible()
+  expect(
+    await page.evaluate(() =>
+      Array.from(document.querySelectorAll<HTMLElement>('*'))
+        .filter((element) => element.getBoundingClientRect().right > window.innerWidth + 1)
+        .map((element) => `${element.tagName}.${element.className}`),
+    ),
+  ).toEqual([])
+  expect(
+    await page.evaluate(() => {
+      const scroller = document.scrollingElement
+      if (!scroller) return false
+      scroller.scrollLeft = 1
+      const canScrollHorizontally = scroller.scrollLeft !== 0
+      scroller.scrollLeft = 0
+      return !canScrollHorizontally
+    }),
+  ).toBe(true)
   const endpoint = page.getByLabel('x402 service endpoint').first()
   const submit = page.getByRole('button', { name: 'Check service' }).first()
   await expect(submit).toBeDisabled()
