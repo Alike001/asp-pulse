@@ -36,6 +36,22 @@ export interface PreflightObservation {
   latencyMs: number
   httpStatus?: number
   challengeBody?: unknown
+  xLayerEvidence?: XLayerRpcEvidence
+  error?: string
+}
+
+export interface XLayerAssetEvidence {
+  address: string
+  contractCodeHash: string
+  symbol: string
+  decimals: number
+}
+
+export interface XLayerRpcEvidence {
+  rpcUrl: string
+  chainId: number
+  blockNumber: number
+  assets: XLayerAssetEvidence[]
   error?: string
 }
 

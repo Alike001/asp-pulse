@@ -46,7 +46,10 @@ input: { "target": "https://service.example/paid-route" }`}</pre>
           <article>
             <span className="mono">GET</span>
             <h2>/v1/config</h2>
-            <p>Inspect the public preflight rule-set, network, and supported assets.</p>
+            <p>
+              Inspect the rule-set, supported assets, and fixed read-only X Layer RPC
+              evidence sources.
+            </p>
           </article>
         </div>
       </section>

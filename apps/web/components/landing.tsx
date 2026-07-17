@@ -15,7 +15,7 @@ const checkCopy = [
   [
     '04',
     'X Layer payment terms',
-    'Does it name chain 196, a supported scheme and asset?',
+    'Do the terms match live chain 196 and token-contract evidence?',
   ],
   ['05', 'Advertised price', 'Unavailable until trusted listing metadata is connected.'],
   ['06', 'Protected response', 'Unavailable in this payment-free preflight.'],
@@ -87,9 +87,9 @@ export function Landing() {
             Three evidence gates.
           </h2>
           <p>
-            Reachability, a bound x402 challenge, and X Layer payment terms run now.
-            Registry data and paid delivery remain evidence gates until their sources are
-            connected.
+            Reachability, a bound x402 challenge, and read-only X Layer chain evidence run
+            now. Registry data and paid delivery remain evidence gates until their sources
+            are connected.
           </p>
         </div>
         <div className="check-stack">
@@ -145,9 +145,9 @@ export function Landing() {
           </div>
           <div className="method-card mono">
             <span>RULE SET</span>
-            <strong>PULSE-RULESET/1.0.0</strong>
+            <strong>PULSE-RULESET/1.1.0</strong>
             <p>
-              HTTP response · x402 v2 · eip155:196 · supported assets · SHA-256 evidence
+              HTTP response · x402 v2 · X Layer RPC · token contracts · SHA-256 evidence
             </p>
             <a href="/methodology">Read the methodology →</a>
           </div>
@@ -263,7 +263,7 @@ function Footer() {
     <footer className="shell">
       <div className="brand-line">
         <span>ASP Pulse</span>
-        <span className="mono">PULSE-RULESET/1.0.0</span>
+        <span className="mono">PULSE-RULESET/1.1.0</span>
       </div>
       <div className="footer-links">
         <a href="/methodology">Methodology</a>

@@ -1,5 +1,5 @@
 import {
-  evaluatePreflight,
+  evaluatePreflightForRuleSet,
   RULE_SET_VERSION,
   X_LAYER_ASSETS,
   X_LAYER_NETWORK,
@@ -11,13 +11,19 @@ import { createMcpHandler } from './mcp.js'
 import { type ProbeDependencies } from './probe.js'
 import { createScanService } from './scan-service.js'
 import { MemoryScanStore, type ScanStore } from './store.js'
+import {
+  X_LAYER_RPC_URLS,
+  type CollectXLayerEvidence,
+  type XLayerRpcDependencies,
+} from './xlayer-rpc.js'
 
-export interface AppDependencies extends ProbeDependencies {
+export interface AppDependencies extends ProbeDependencies, XLayerRpcDependencies {
   store?: ScanStore
   createId?: () => string
   scanLimit?: number
   scanLimitWindowMs?: number
   retentionDays?: number
+  collectXLayerEvidence?: CollectXLayerEvidence
 }
 
 export function createApp(dependencies: AppDependencies = {}): Hono {
@@ -90,6 +96,7 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
         'GET /v1/scans/:id/verify — recompute the stored evidence and compare its receipt.',
         'GET /v1/network — aggregates derived only from captured scans.',
         '',
+        'Supported payment terms are checked against read-only X Layer RPC evidence.',
         'The free preflight never sends payment. Protected delivery remains not tested.',
       ].join('\n'),
     ),
@@ -139,6 +146,10 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
       ruleSetVersion: RULE_SET_VERSION,
       xLayerNetwork: X_LAYER_NETWORK,
       supportedAssets: X_LAYER_ASSETS,
+      xLayerEvidence: {
+        mode: 'read-only',
+        rpcUrls: X_LAYER_RPC_URLS,
+      },
       paidCanaryEnabled: false,
     }),
   )
@@ -185,7 +196,7 @@ export function createApp(dependencies: AppDependencies = {}): Hono {
     if (!scan) return context.json({ error: 'Scan not found.' }, 404)
     if (!scan.evidence)
       return context.json({ error: 'Evidence unavailable for this legacy scan.' }, 409)
-    const report = evaluatePreflight(scan.evidence)
+    const report = evaluatePreflightForRuleSet(scan.evidence, scan.report.ruleSetVersion)
     return context.json({
       id: scan.id,
       valid: report.evidenceHash === scan.report.evidenceHash,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { X_LAYER_ASSETS } from '@asp-pulse/core'
+import { evaluatePreflightV1, X_LAYER_ASSETS } from '@asp-pulse/core'
 import { createApp } from '../src/app.js'
+import { MemoryScanStore } from '../src/store.js'
 import type { HostResolver } from '../src/target-safety.js'
 
 const publicResolver: HostResolver = async () => [{ address: '93.184.216.34', family: 4 }]
@@ -11,6 +12,7 @@ describe('scan API', () => {
       createId: () => 'scan-1',
       now: sequence(1000, 1084),
       resolveHost: publicResolver,
+      collectXLayerEvidence: async () => liveXLayerEvidence(),
       fetchImpl: async () =>
         new Response(null, {
           status: 402,
@@ -43,6 +45,11 @@ describe('scan API', () => {
     const scan = await response.json()
     expect(scan.id).toBe('scan-1')
     expect(scan.report.verdict).toBe('preflight_verified')
+    expect(scan.report.ruleSetVersion).toBe('PULSE-RULESET/1.1.0')
+    expect(scan.evidence.xLayerEvidence).toMatchObject({
+      chainId: 196,
+      blockNumber: 65_000_000,
+    })
 
     const replay = await app.request('/v1/scans/scan-1')
     expect(replay.status).toBe(200)
@@ -67,11 +74,41 @@ describe('scan API', () => {
     expect(response.status).toBe(400)
   })
 
+  it('recomputes a stored version-one receipt with its original evaluator', async () => {
+    const store = new MemoryScanStore()
+    const evidence = {
+      target: 'https://provider.example/service',
+      checkedAt: '2026-07-14T12:00:00.000Z',
+      latencyMs: 84,
+      httpStatus: 402,
+      challengeBody: JSON.parse(
+        Buffer.from(
+          compliantChallenge().headers.get('payment-required')!,
+          'base64',
+        ).toString('utf8'),
+      ) as unknown,
+    }
+    await store.save({
+      id: 'legacy-scan',
+      evidence,
+      report: evaluatePreflightV1(evidence),
+    })
+    const app = createApp({ store })
+
+    const verification = await app.request('/v1/scans/legacy-scan/verify')
+    expect(verification.status).toBe(200)
+    expect(await verification.json()).toMatchObject({
+      valid: true,
+      report: { ruleSetVersion: 'PULSE-RULESET/1.0.0' },
+    })
+  })
+
   it('limits scan execution per anonymous source without limiting another source', async () => {
     const app = createApp({
       now: () => 1_000,
       scanLimit: 1,
       resolveHost: publicResolver,
+      collectXLayerEvidence: async () => liveXLayerEvidence(),
       fetchImpl: async () => compliantChallenge(),
     })
     const request = (source: string) =>
@@ -96,6 +133,7 @@ describe('scan API', () => {
       createId: () => 'mcp-scan-1',
       now: sequence(1000, 1084),
       resolveHost: publicResolver,
+      collectXLayerEvidence: async () => liveXLayerEvidence(),
       fetchImpl: async () => compliantChallenge(),
     })
 
@@ -157,6 +195,22 @@ function compliantChallenge(): Response {
       ).toString('base64'),
     },
   })
+}
+
+function liveXLayerEvidence() {
+  return {
+    rpcUrl: 'https://rpc.xlayer.tech',
+    chainId: 196,
+    blockNumber: 65_000_000,
+    assets: [
+      {
+        address: X_LAYER_ASSETS.USDG,
+        contractCodeHash: 'a'.repeat(64),
+        symbol: 'USDG',
+        decimals: 6,
+      },
+    ],
+  }
 }
 
 function mcpRequest(app: ReturnType<typeof createApp>, body: unknown): Promise<Response> {

@@ -15,7 +15,9 @@ test('landing presents a usable, accessible real scanner', async ({ page }) => {
   expect(
     await page.evaluate(() =>
       Array.from(document.querySelectorAll<HTMLElement>('*'))
-        .filter((element) => element.getBoundingClientRect().right > window.innerWidth + 1)
+        .filter(
+          (element) => element.getBoundingClientRect().right > window.innerWidth + 1,
+        )
         .map((element) => `${element.tagName}.${element.className}`),
     ),
   ).toEqual([])

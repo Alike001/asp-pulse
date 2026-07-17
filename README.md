@@ -4,7 +4,7 @@
 
 **Know before you pay.** ASP Pulse checks whether a public HTTPS GET x402 endpoint is callable now, returns a challenge bound to the exact endpoint, and advertises supported X Layer payment terms before an agent sends payment.
 
-The verdict is deterministic. The same captured evidence and `PULSE-RULESET/1.0.0` produce the same SHA-256 receipt. Rechecking a receipt recomputes the verdict from that stored evidence; it does not repeat the live network request. A free preflight never claims to verify payment settlement or the protected response; those checks remain **not tested** unless separate evidence exists.
+The verdict is deterministic. New scans use `PULSE-RULESET/1.1.0` and capture read-only X Layer chain and token-contract evidence alongside the HTTP challenge. The same stored evidence produces the same SHA-256 receipt; legacy `1.0.0` receipts remain recomputable with their original evaluator. Rechecking a receipt does not repeat the live network request. A free preflight never claims to verify payment settlement or the protected response; those checks remain **not tested** unless separate evidence exists.
 
 The hosted product is the zero-setup judge path. It accepts only public HTTPS GET endpoints, never sends payment, and offers a one-click rerun of the latest stored preflight-passing public endpoint when evidence is available. Reports are retained for 30 days; scan operations are limited to 30 per anonymous source per hour to protect public targets and the shared service.
 
@@ -62,7 +62,7 @@ npm run verify
 
 1. Endpoint reachability — live HTTP 402 response.
 2. x402 challenge — canonical base64 `PAYMENT-REQUIRED` header or compatible JSON body, parsed as x402 v2 and bound to the scanned resource URL.
-3. X Layer payment terms — `eip155:196`, an officially supported scheme, a supported asset, a positive atomic amount, and valid recipient address.
+3. X Layer payment terms — `eip155:196`, a supported scheme and asset, a positive atomic amount, a valid recipient address, and live read-only evidence that the RPC chain ID is 196 and the advertised asset contract has the expected symbol and decimals. The evidence records the X Layer block number and a SHA-256 hash of the contract bytecode.
 4. Discovery metadata — unavailable in version one because trusted OKX.AI registry metadata is not connected.
 5. Advertised price — unavailable in version one; ASP Pulse never claims price verification without trusted listing metadata.
 6. Protected response — unavailable in version one; the free preflight never pays, settles, or inspects protected delivery.
@@ -72,6 +72,8 @@ npm run verify
 The Streamable HTTP MCP endpoint is `/mcp` (or `/api/mcp` on Vercel). It exposes `preflight_x402_endpoint` with one argument: `target`, a complete public HTTPS URL. The tool performs the same unauthenticated GET-only preflight as the web scanner and returns the report ID, deterministic verdict, check states, and evidence receipt. It never sends payment.
 
 Public probes reject credentials, nonstandard ports, redirects, oversized bodies, and local/private/reserved IP ranges. DNS answers are pinned into the outbound connection to prevent rebinding after validation.
+
+X Layer evidence uses only the fixed official public RPC endpoints `https://rpc.xlayer.tech` and `https://xlayerrpc.okx.com`, with strict timeouts, fallback, and a short in-memory cache. Users cannot supply an RPC URL. An RPC outage produces an explicit degraded report rather than an unsupported verification claim.
 
 ## Payment boundary
 

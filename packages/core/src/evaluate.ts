@@ -1,7 +1,10 @@
 import {
+  LEGACY_RULE_SET_VERSION,
   RULE_SET_VERSION,
   SUPPORTED_ASSETS,
   X402_VERSION,
+  X_LAYER_ASSET_METADATA,
+  X_LAYER_CHAIN_ID,
   X_LAYER_NETWORK,
   X_LAYER_PAYMENT_SCHEMES,
 } from './constants.js'
@@ -10,6 +13,7 @@ import { evidenceHash } from './canonical.js'
 import type {
   CheckResult,
   CheckStatus,
+  PaymentRequirement,
   PreflightObservation,
   ScanReport,
   Verdict,
@@ -47,6 +51,29 @@ const verdictLabels: Record<Verdict, string> = {
 }
 
 export function evaluatePreflight(observation: PreflightObservation): ScanReport {
+  return evaluate(observation, RULE_SET_VERSION, true)
+}
+
+export function evaluatePreflightForRuleSet(
+  observation: PreflightObservation,
+  ruleSetVersion: string,
+): ScanReport {
+  if (ruleSetVersion === LEGACY_RULE_SET_VERSION) {
+    return evaluate(observation, LEGACY_RULE_SET_VERSION, false)
+  }
+  if (ruleSetVersion === RULE_SET_VERSION) return evaluatePreflight(observation)
+  throw new Error(`Unsupported rule set: ${ruleSetVersion}`)
+}
+
+export function evaluatePreflightV1(observation: PreflightObservation): ScanReport {
+  return evaluate(observation, LEGACY_RULE_SET_VERSION, false)
+}
+
+function evaluate(
+  observation: PreflightObservation,
+  ruleSetVersion: string,
+  requireLiveXLayerEvidence: boolean,
+): ScanReport {
   const challenge = parseX402Challenge(observation.challengeBody)
   const compatible = challenge?.accepts.filter(isXLayerCompatible)
   const checks: CheckResult[] = [
@@ -68,42 +95,12 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
           { expected: 402, observed: observation.httpStatus },
         ),
     evaluateChallenge(challenge, observation.target),
-    compatible && compatible.length > 0
-      ? check(
-          'payment_terms',
-          'X Layer payment terms',
-          'pass',
-          'Supported X Layer payment terms found.',
-          {
-            expected: {
-              network: X_LAYER_NETWORK,
-              assets: [...SUPPORTED_ASSETS],
-              schemes: [...X_LAYER_PAYMENT_SCHEMES],
-            },
-            observed: compatible.map(({ network, asset, scheme }) => ({
-              network,
-              asset,
-              scheme,
-            })),
-          },
-        )
-      : check(
-          'payment_terms',
-          'X Layer payment terms',
-          'fail',
-          'No supported X Layer asset found.',
-          {
-            expected: {
-              network: X_LAYER_NETWORK,
-              assets: [...SUPPORTED_ASSETS],
-              schemes: [...X_LAYER_PAYMENT_SCHEMES],
-            },
-            observed: challenge?.accepts.map(({ network, asset }) => ({
-              network,
-              asset,
-            })),
-          },
-        ),
+    evaluatePaymentTerms(
+      challenge,
+      compatible,
+      observation.xLayerEvidence,
+      requireLiveXLayerEvidence,
+    ),
     check(
       'price',
       'Advertised price',
@@ -122,10 +119,10 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
   const evidence = {
     ...observation,
     challengeBody: challenge,
-    ruleSetVersion: RULE_SET_VERSION,
+    ruleSetVersion,
   }
   return {
-    ruleSetVersion: RULE_SET_VERSION,
+    ruleSetVersion,
     target: observation.target,
     checkedAt: observation.checkedAt,
     latencyMs: observation.latencyMs,
@@ -134,6 +131,107 @@ export function evaluatePreflight(observation: PreflightObservation): ScanReport
     checks,
     evidenceHash: evidenceHash(evidence),
   }
+}
+
+function evaluatePaymentTerms(
+  challenge: ReturnType<typeof parseX402Challenge>,
+  compatible: PaymentRequirement[] | undefined,
+  xLayerEvidence: PreflightObservation['xLayerEvidence'],
+  requireLiveXLayerEvidence: boolean,
+): CheckResult {
+  const expected = {
+    network: X_LAYER_NETWORK,
+    chainId: X_LAYER_CHAIN_ID,
+    assets: [...SUPPORTED_ASSETS],
+    schemes: [...X_LAYER_PAYMENT_SCHEMES],
+  }
+  if (!compatible || compatible.length === 0) {
+    return check(
+      'payment_terms',
+      'X Layer payment terms',
+      'fail',
+      'No supported X Layer asset found.',
+      {
+        expected,
+        observed: challenge?.accepts.map(({ network, asset }) => ({ network, asset })),
+      },
+    )
+  }
+
+  const advertised = compatible.map(({ network, asset, scheme }) => ({
+    network,
+    asset,
+    scheme,
+  }))
+  if (!requireLiveXLayerEvidence) {
+    return check(
+      'payment_terms',
+      'X Layer payment terms',
+      'pass',
+      'Supported X Layer payment terms found.',
+      {
+        expected: {
+          network: X_LAYER_NETWORK,
+          assets: [...SUPPORTED_ASSETS],
+          schemes: [...X_LAYER_PAYMENT_SCHEMES],
+        },
+        observed: advertised,
+      },
+    )
+  }
+  if (!xLayerEvidence || xLayerEvidence.error) {
+    return check(
+      'payment_terms',
+      'X Layer payment terms',
+      'warning',
+      'Supported terms found, but live X Layer state could not be verified.',
+      { expected, observed: { advertised, rpc: xLayerEvidence ?? 'Unavailable' } },
+    )
+  }
+
+  const evidenceByAddress = new Map(
+    xLayerEvidence.assets.map((asset) => [asset.address.toLowerCase(), asset]),
+  )
+  const assetsVerified = compatible.every(({ asset }) => {
+    const evidence = evidenceByAddress.get(asset.toLowerCase())
+    const metadata = assetMetadata(asset)
+    return (
+      evidence !== undefined &&
+      metadata !== undefined &&
+      evidence.contractCodeHash.length === 64 &&
+      normalizeSymbol(evidence.symbol) === normalizeSymbol(metadata.symbol) &&
+      evidence.decimals === metadata.decimals
+    )
+  })
+  const chainVerified = xLayerEvidence.chainId === X_LAYER_CHAIN_ID
+  return check(
+    'payment_terms',
+    'X Layer payment terms',
+    chainVerified && assetsVerified ? 'pass' : 'fail',
+    chainVerified && assetsVerified
+      ? 'Payment terms match live X Layer chain and token-contract evidence.'
+      : 'Advertised payment terms do not match live X Layer evidence.',
+    {
+      expected,
+      observed: {
+        advertised,
+        rpc: xLayerEvidence,
+      },
+    },
+  )
+}
+
+function assetMetadata(
+  address: string,
+): { symbol: string; decimals: number } | undefined {
+  const normalized = address.toLowerCase()
+  return Object.entries(X_LAYER_ASSET_METADATA).find(
+    ([asset]) => asset.toLowerCase() === normalized,
+  )?.[1]
+}
+
+function normalizeSymbol(symbol: string): string {
+  return symbol.normalize('NFKC').replaceAll('₮', 'T').replaceAll('₀', '0').toUpperCase()
 }
 
 function evaluateChallenge(

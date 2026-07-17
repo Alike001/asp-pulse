@@ -15,7 +15,7 @@ const rules = [
   ],
   [
     'X Layer payment terms',
-    'Passes only when an advertised payment option uses eip155:196, an officially supported scheme, an explicitly supported X Layer asset address, a positive amount, and a valid recipient address. It does not prove settlement.',
+    'Passes only when advertised terms use eip155:196, a supported scheme and asset, a positive amount, and a valid recipient—and read-only X Layer RPC evidence confirms chain 196 plus the asset contract, symbol, and decimals. It does not prove settlement.',
   ],
   [
     'Advertised price',
@@ -32,12 +32,13 @@ export default function MethodologyPage() {
     <main>
       <SiteHeader />
       <section className="document shell">
-        <span className="eyebrow">#PULSE-RULESET/1.0.0</span>
+        <span className="eyebrow">#PULSE-RULESET/1.1.0</span>
         <h1>Evidence before confidence.</h1>
         <p className="document-lead">
           ASP Pulse does not ask an AI model to invent a trust score. It applies three
           live checks and preserves three unavailable evidence gates. Identical captured
-          evidence produces an identical verdict and receipt hash.
+          evidence—including the captured X Layer block and token-contract facts—produces
+          an identical verdict and receipt hash.
         </p>
         <div className="rule-list">
           {rules.map(([title, body], index) => (
@@ -54,9 +55,10 @@ export default function MethodologyPage() {
           <span className="eyebrow">#IMPORTANT BOUNDARY</span>
           <h2>Free preflight is not paid delivery proof.</h2>
           <p>
-            A payment-free request can verify the service’s HTTP 402 challenge, network,
-            asset, and protocol shape. It cannot see a protected response, submit a
-            payment, or prove settlement. Those checks remain visibly marked “not tested.”
+            A payment-free request can verify the service’s HTTP 402 challenge and capture
+            read-only X Layer chain and token-contract evidence. It cannot see a protected
+            response, submit a payment, or prove settlement. Those checks remain visibly
+            marked “not tested.”
           </p>
         </section>
       </section>
